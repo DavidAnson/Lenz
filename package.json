@@ -6,9 +6,17 @@
   "license": "MIT",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "test": "xo"
   },
   "devDependencies": {
-    "electron": "^1.4.13"
+    "electron": "^1.4.13",
+    "xo": "^0.17.1"
+  },
+  "xo": {
+    "esnext": true,
+    "rules": {
+      "linebreak-style": "off"
+    }
   }
 }
