@@ -1,0 +1,10 @@
+{
+  "name": "loupe",
+  "version": "0.1.0",
+  "description": "A simple app for reviewing photos and picking favorites.",
+  "author": "David Anson (https://dlaa.me/)",
+  "license": "MIT",
+  "main": "main.js",
+  "scripts": {
+  }
+}
