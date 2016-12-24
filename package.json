@@ -9,12 +9,19 @@
     "start": "electron .",
     "test": "xo"
   },
+  "dependencies": {
+    "react": "^15.4.1",
+    "react-dom": "^15.4.1"
+  },
   "devDependencies": {
     "electron": "^1.4.13",
     "xo": "^0.17.1"
   },
   "xo": {
-    "envs": ["browser", "node"],
+    "envs": [
+      "browser",
+      "node"
+    ],
     "esnext": true,
     "rules": {
       "linebreak-style": "off"
