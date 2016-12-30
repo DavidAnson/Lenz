@@ -10,6 +10,7 @@
     "test": "xo"
   },
   "dependencies": {
+    "exif": "^0.6.0",
     "pify": "^2.3.0",
     "react": "^15.4.1",
     "react-dom": "^15.4.1"
