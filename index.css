@@ -14,7 +14,8 @@ img {
 	padding: 5px;
 	margin: 2px;
 }
-/*img.rotate-none {}*/
+/*img.rotate-none {
+}*/
 img.rotate-flip {
 	transform: rotate(180deg);
 }

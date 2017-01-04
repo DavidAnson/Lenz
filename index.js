@@ -1,9 +1,8 @@
 'use strict';
 
-const remote = require('electron').remote;
+const {ipcRenderer, remote} = require('electron');
 const fs = require('fs');
 const path = require('path');
-const {ExifImage} = require('exif');
 const pify = require('pify');
 const React = require('react');
 const ReactDOM = require('react-dom');
@@ -17,44 +16,53 @@ const exifImageOrientationMap = {
 	8: 'rotate-ccw'
 };
 
-function getExif(file) {
-	return new Promise((resolve, reject) => {
-		new ExifImage({image: file}, (error, exif) => {
-			if (error) {
-				reject(error);
-			} else {
-				resolve({
-					file,
-					exif
-				});
-			}
+class IpcWrapper {
+	constructor() {
+		this.id = 1;
+		this.pending = {};
+		ipcRenderer.on('getExif', (event, arg) => {
+			const {id, exif} = arg;
+			this.pending[id](exif);
+			delete this.pending[id];
 		});
-	});
+	}
+
+	getExif(file, callback) {
+		const id = this.id;
+		this.id++;
+		this.pending[id] = callback;
+		ipcRenderer.send('getExif', {
+			id,
+			file
+		});
+	}
 }
+const ipcWrapper = new IpcWrapper();
 
 class Picture extends React.Component {
 	constructor() {
 		super();
 		this.state = {
+			src: 'waiting.svg',
 			orientation: null
 		};
 	}
 
 	render() {
-		getExif(this.props.file)
-			.then(result => {
-				const {file, exif} = result;
-				if ((file === this.props.file) && exif.image && exif.image.Orientation) {
-					this.setState({orientation: exifImageOrientationMap[exif.image.Orientation]});
-				}
+		ipcWrapper.getExif(this.props.file, exif => {
+			const orientation = exif && exif.image && exif.image.Orientation && exifImageOrientationMap[exif.image.Orientation];
+			this.setState({
+				src: this.props.file,
+				orientation
 			});
+		});
 		return React.createElement(
 			'div', {
 				className: 'frame'
 			},
 			React.createElement(
 				'img', {
-					src: this.props.file,
+					src: this.state.src,
 					title: path.basename(this.props.file),
 					className: this.state.orientation
 				}
@@ -104,9 +112,12 @@ class Page extends React.Component {
 				if (directories) {
 					const directory = directories[0];
 					return pify(fs.readdir)(directory)
-						.then(files => {
+						.then(allFiles => {
+							const files = allFiles
+								.filter(file => file.match(imageRe))
+								.map(file => path.join(directory, file));
 							this.setState({
-								files: files.filter(file => file.match(imageRe)).map(file => path.join(directory, file))
+								files
 							});
 						});
 				}

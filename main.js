@@ -1,8 +1,9 @@
 'use strict';
 
-const {app, BrowserWindow} = require('electron');
+const {app, BrowserWindow, ipcMain} = require('electron');
 const path = require('path');
 const url = require('url');
+const {ExifImage} = require('exif');
 const packageJson = require('./package.json');
 
 let win;
@@ -37,4 +38,31 @@ app.on('activate', () => {
 	if (win === null) {
 		createWindow();
 	}
+});
+
+function getExif(file) {
+	return new Promise((resolve, reject) => {
+		// eslint-disable-next-line no-new
+		new ExifImage({image: file}, (error, exif) => {
+			if (error) {
+				reject(error);
+			} else {
+				resolve(exif);
+			}
+		});
+	});
+}
+
+ipcMain.on('getExif', (event, arg) => {
+	const {id, file} = arg;
+	getExif(file)
+		.catch(() => {
+			// Transform errors to empty exif data
+		})
+		.then(exif => {
+			event.sender.send('getExif', {
+				id,
+				exif
+			});
+		});
 });
