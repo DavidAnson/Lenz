@@ -1,6 +1,20 @@
+:root {
+	--picture-size: 200px;
+}
+@media (max-width: 500px), (max-height: 500px) {
+	:root {
+		--picture-size: 100px;
+	}
+}
+@media (min-width: 1000px), (min-height: 1000px) {
+	:root {
+		--picture-size: 300px;
+	}
+}
+
 img {
-	max-width: 200px;
-	max-height: 200px;
+	max-width: var(--picture-size);
+	max-height: var(--picture-size);
 	/*image-orientation: from-image; Not available in Chrome yet*/
 }
 
@@ -8,8 +22,8 @@ img {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 200px;
-	height: 200px;
+	width: var(--picture-size);
+	height: var(--picture-size);
 	background-color: lightgray;
 	padding: 5px;
 	margin: 2px;
