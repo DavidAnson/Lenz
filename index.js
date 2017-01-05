@@ -43,19 +43,25 @@ class Picture extends React.Component {
 	constructor() {
 		super();
 		this.state = {
-			src: 'waiting.svg',
+			src: this.waitingImage,
 			orientation: null
 		};
 	}
 
+	get waitingImage() {
+		return 'waiting.svg';
+	}
+
 	render() {
-		ipcWrapper.getExif(this.props.file, exif => {
-			const orientation = exif && exif.image && exif.image.Orientation && exifImageOrientationMap[exif.image.Orientation];
-			this.setState({
-				src: this.props.file,
-				orientation
+		if (this.state.src === this.waitingImage) {
+			ipcWrapper.getExif(this.props.file, exif => {
+				const orientation = exif && exif.image && exif.image.Orientation && exifImageOrientationMap[exif.image.Orientation];
+				this.setState({
+					src: this.props.file,
+					orientation
+				});
 			});
-		});
+		}
 		return React.createElement(
 			'div', {
 				className: 'frame'

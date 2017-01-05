@@ -13,6 +13,7 @@ img {
 	background-color: lightgray;
 	padding: 5px;
 	margin: 2px;
+	vertical-align: top;
 }
 /*img.rotate-none {
 }*/
