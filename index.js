@@ -6,8 +6,10 @@ const path = require('path');
 const pify = require('pify');
 const React = require('react');
 const ReactDOM = require('react-dom');
+const ipc = require('./ipc.js');
 
 const dialog = remote.dialog;
+const getExifIpc = ipc.createClient(ipcRenderer, 'getExif');
 const imageRe = /\.(bmp|gif|png|jpeg|jpg|jxr|tif|tiff|webp)$/i;
 const exifImageOrientationMap = {
 	1: 'rotate-none',
@@ -15,29 +17,6 @@ const exifImageOrientationMap = {
 	6: 'rotate-cw',
 	8: 'rotate-ccw'
 };
-
-class IpcWrapper {
-	constructor() {
-		this.id = 1;
-		this.pending = {};
-		ipcRenderer.on('getExif', (event, arg) => {
-			const {id, exif} = arg;
-			this.pending[id](exif);
-			delete this.pending[id];
-		});
-	}
-
-	getExif(file, callback) {
-		const id = this.id;
-		this.id++;
-		this.pending[id] = callback;
-		ipcRenderer.send('getExif', {
-			id,
-			file
-		});
-	}
-}
-const ipcWrapper = new IpcWrapper();
 
 class Picture extends React.Component {
 	constructor() {
@@ -54,7 +33,7 @@ class Picture extends React.Component {
 
 	render() {
 		if (this.state.src === this.waitingImage) {
-			ipcWrapper.getExif(this.props.file, exif => {
+			getExifIpc(this.props.file, exif => {
 				const orientation = exif && exif.image && exif.image.Orientation && exifImageOrientationMap[exif.image.Orientation];
 				this.setState({
 					src: this.props.file,

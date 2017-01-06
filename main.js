@@ -4,6 +4,7 @@ const {app, BrowserWindow, ipcMain} = require('electron');
 const path = require('path');
 const url = require('url');
 const {ExifImage} = require('exif');
+const ipc = require('./ipc.js');
 const packageJson = require('./package.json');
 
 let win;
@@ -53,16 +54,10 @@ function getExif(file) {
 	});
 }
 
-ipcMain.on('getExif', (event, arg) => {
-	const {id, file} = arg;
-	getExif(file)
+ipc.createServer(ipcMain, 'getExif', (arg, reply) => {
+	getExif(arg)
 		.catch(() => {
 			// Transform errors to empty exif data
 		})
-		.then(exif => {
-			event.sender.send('getExif', {
-				id,
-				exif
-			});
-		});
+		.then(reply);
 });
