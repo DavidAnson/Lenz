@@ -22,36 +22,53 @@ class Picture extends React.Component {
 	constructor() {
 		super();
 		this.state = {
-			src: this.waitingImage,
+			stage: 'loading',
 			orientation: null
 		};
 	}
 
-	get waitingImage() {
-		return 'waiting.svg';
-	}
-
 	render() {
-		if (this.state.src === this.waitingImage) {
+		if (this.state.stage === 'loading') {
 			getExifIpc(this.props.file, exif => {
 				const orientation = exif && exif.image && exif.image.Orientation && exifImageOrientationMap[exif.image.Orientation];
 				this.setState({
-					src: this.props.file,
+					stage: 'preview',
 					orientation
 				});
 			});
+		}
+		const children = [];
+		const pushImage = props => {
+			children.push(React.createElement('img', props));
+		};
+		if (this.state.stage === 'loading') {
+			pushImage({src: 'waiting.svg'});
+		} else if (this.state.stage === 'preview') {
+			pushImage({src: 'waiting.svg'});
+			pushImage({
+				src: this.props.file,
+				className: 'hidden',
+				onLoad: () => this.setState({
+					stage: 'loaded'
+				}),
+				onError: () => this.setState({
+					stage: 'error'
+				})
+			});
+		} else if (this.state.stage === 'loaded') {
+			pushImage({
+				src: this.props.file,
+				title: path.basename(this.props.file),
+				className: this.state.orientation
+			});
+		} else if (this.state.stage === 'error') {
+			pushImage({src: 'warning.svg'});
 		}
 		return React.createElement(
 			'div', {
 				className: 'frame'
 			},
-			React.createElement(
-				'img', {
-					src: this.state.src,
-					title: path.basename(this.props.file),
-					className: this.state.orientation
-				}
-			)
+			...children
 		);
 	}
 }

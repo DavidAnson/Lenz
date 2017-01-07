@@ -40,3 +40,8 @@ img.rotate-cw {
 img.rotate-ccw {
 	transform: rotate(270deg);
 }
+
+.hidden {
+	width: 0px;
+	height: 0px;
+}
