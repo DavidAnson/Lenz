@@ -80,12 +80,7 @@ class Picture extends React.Component {
 		} else if (this.state.stage === 'error') {
 			pushImage({src: 'warning.svg'});
 		}
-		return React.createElement(
-			'div', {
-				className: 'frame'
-			},
-			...children
-		);
+		return React.createElement('li', {}, ...children);
 	}
 }
 
@@ -107,7 +102,7 @@ class Page extends React.Component {
 				},
 				'Open Folder'),
 			React.createElement(
-				'div',
+				'ul',
 				null,
 				this.state.files.map(file => React.createElement(
 					Picture, {

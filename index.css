@@ -18,7 +18,12 @@ img {
 	/*image-orientation: from-image; Not available in Chrome yet*/
 }
 
-.frame {
+ul {
+	margin: 0px;
+	padding: 0px;
+	list-style-type: none;
+}
+li {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -26,7 +31,7 @@ img {
 	height: var(--picture-size);
 	background-color: lightgray;
 	padding: 5px;
-	margin: 2px;
+	margin: 0px 4px 4px 0px;
 	vertical-align: top;
 }
 /*img.rotate-none {
