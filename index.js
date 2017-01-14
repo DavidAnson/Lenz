@@ -21,24 +21,29 @@ const exifImageOrientationMap = {
 };
 
 class Picture extends React.Component {
-	constructor() {
-		super();
+	constructor(props) {
+		super(props);
+		const {exif} = props.picture;
 		this.state = {
-			stage: 'loading',
-			orientation: null
+			stage: exif ? 'loaded' : 'loading',
+			orientation: exif ? exif.orientation : null
 		};
 	}
 
 	render() {
 		if (this.state.stage === 'loading') {
-			getExifIpc(this.props.file, exif => {
-				const orientation = exifImageOrientationMap[exif.orientation];
+			getExifIpc(this.props.picture.file, exif => {
+				const {orientation} = exif;
 				let thumbnail = null;
 				if (exif.thumbnail) {
 					const datauri = new Datauri();
 					datauri.format('.jpg', exif.thumbnail);
 					thumbnail = datauri.content;
 				}
+				this.props.picture.exif = {
+					orientation,
+					thumbnail
+				};
 				this.setState({
 					stage: 'preview',
 					orientation,
@@ -48,7 +53,7 @@ class Picture extends React.Component {
 		}
 		const children = [];
 		const pushImage = props => {
-			props.title = path.basename(this.props.file);
+			props.title = path.basename(this.props.picture.file);
 			children.push(React.createElement('img', props));
 		};
 		if (this.state.stage === 'loading') {
@@ -57,13 +62,13 @@ class Picture extends React.Component {
 			if (this.state.thumbnail) {
 				pushImage({
 					src: this.state.thumbnail,
-					className: this.state.orientation
+					className: exifImageOrientationMap[this.state.orientation]
 				});
 			} else {
 				pushImage({src: 'waiting.svg'});
 			}
 			pushImage({
-				src: this.props.file,
+				src: this.props.picture.file,
 				className: 'hidden',
 				onLoad: () => this.setState({
 					stage: 'loaded'
@@ -74,28 +79,38 @@ class Picture extends React.Component {
 			});
 		} else if (this.state.stage === 'loaded') {
 			pushImage({
-				src: this.props.file,
-				className: this.state.orientation
+				src: this.props.picture.file,
+				className: exifImageOrientationMap[this.state.orientation],
+				onError: () => this.setState({
+					stage: 'error'
+				})
 			});
 		} else if (this.state.stage === 'error') {
 			pushImage({src: 'warning.svg'});
 		}
-		return React.createElement('li', {}, ...children);
+		return React.createElement(this.props.className === 'thumb' ? 'li' : 'div', {
+			className: 'picture ' + (this.props.className || ''),
+			onClick: this.props.onClick
+		}, ...children);
 	}
 }
 
 class Page extends React.Component {
-	constructor() {
-		super();
+	constructor(props) {
+		super(props);
 		this.state = {
-			files: []
+			pictures: [],
+			index: -1
 		};
 	}
 
 	render() {
-		return React.createElement(
-			'div',
-			null,
+		const zoomed = (this.state.index !== -1);
+		const children = [];
+		children.push(React.createElement(
+			'div', {
+				className: zoomed ? 'hidden' : null
+			},
 			React.createElement(
 				'button', {
 					onClick: () => this.openFolder()
@@ -104,14 +119,38 @@ class Page extends React.Component {
 			React.createElement(
 				'ul',
 				null,
-				this.state.files.map(file => React.createElement(
+				this.state.pictures.map((picture, index) => React.createElement(
 					Picture, {
-						file,
-						key: file
+						key: picture.file,
+						picture,
+						className: 'thumb',
+						onClick: () => {
+							this.showPicture(index);
+						}
 					}
 				))
 			)
-		);
+		));
+		if (zoomed) {
+			const picture = this.state.pictures[this.state.index];
+			children.push(React.createElement(
+				Picture, {
+					picture,
+					onClick: () => {
+						this.showPicture(-1);
+					}
+				}
+			));
+		}
+		return React.createElement('div', {
+			className: 'page'
+		}, ...children);
+	}
+
+	showPicture(index) {
+		this.setState({
+			index
+		});
 	}
 
 	openFolder() {
@@ -123,20 +162,28 @@ class Page extends React.Component {
 		})
 			.then(directories => {
 				if (directories) {
-					const directory = directories[0];
-					return fsReaddir(directory)
-						.then(allFiles => {
-							const files = allFiles
-								.filter(file => file.match(imageRe))
-								.map(file => path.join(directory, file));
-							this.setState({
-								files
-							});
-						});
+					return this.readFolder(directories[0]);
 				}
 			})
 			.catch(err => {
 				dialog.showErrorBox(err.code || 'Oops', err.message);
+			});
+	}
+
+	readFolder(directory) {
+		return fsReaddir(directory)
+			.then(files => {
+				const pictures = files
+					.filter(file => file.match(imageRe))
+					.map(file => {
+						return {
+							file: path.join(directory, file),
+							exif: null
+						};
+					});
+				this.setState({
+					pictures
+				});
 			});
 	}
 }
