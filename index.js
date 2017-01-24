@@ -26,31 +26,65 @@ class Picture extends React.Component {
 		const {exif} = props.picture;
 		this.state = {
 			stage: exif ? 'loaded' : 'loading',
-			orientation: exif ? exif.orientation : null
+			orientation: exif ? exif.orientation : null,
+			details: exif ? exif.details : null
 		};
 	}
 
 	render() {
 		if (this.state.stage === 'loading') {
 			getExifIpc(this.props.picture.file, exif => {
-				const {orientation} = exif;
-				let thumbnail = null;
-				if (exif.thumbnail) {
+				const {exposureTime, flash, fNumber, focalLength, gpsLatitude, gpsLongitude, iso, make, model, modifyDate, orientation, thumbnail} = exif;
+				const details = [];
+				if (fNumber) {
+					details.push(`F-number: \u0192/${fNumber}`);
+				}
+				if (exposureTime) {
+					details.push(`Exposure time: ${exposureTime}s`);
+				}
+				if (iso) {
+					details.push(`ISO speed: ${iso}`);
+				}
+				if (focalLength) {
+					details.push(`Focal length: ${focalLength}mm`);
+				}
+				if (flash) {
+					const value = (flash % 2) ? 'On' : 'Off';
+					details.push(`Flash: ${value}`);
+				}
+				if (modifyDate) {
+					details.push(`Date: ${(new Date(modifyDate)).toLocaleString()}`);
+				}
+				if (gpsLatitude && gpsLongitude) {
+					details.push(`GPS: ${gpsLatitude} ${gpsLongitude}`);
+				}
+				if (make || model) {
+					let value = model || make;
+					if (value && make && !value.startsWith(make)) {
+						value = `${make} ${value}`;
+					}
+					details.push(`Camera: ${value}`);
+				}
+				let thumbnailDataUri = null;
+				if (thumbnail) {
 					const datauri = new Datauri();
-					datauri.format('.jpg', exif.thumbnail);
-					thumbnail = datauri.content;
+					datauri.format('.jpg', thumbnail);
+					thumbnailDataUri = datauri.content;
 				}
 				this.props.picture.exif = {
 					orientation,
-					thumbnail
+					thumbnailDataUri,
+					details
 				};
 				this.setState({
 					stage: 'preview',
 					orientation,
-					thumbnail
+					thumbnailDataUri,
+					details
 				});
 			});
 		}
+		const thumb = (this.props.className === 'thumb');
 		const children = [];
 		const pushImage = props => {
 			props.title = path.basename(this.props.picture.file);
@@ -59,9 +93,9 @@ class Picture extends React.Component {
 		if (this.state.stage === 'loading') {
 			pushImage({src: 'waiting.svg'});
 		} else if (this.state.stage === 'preview') {
-			if (this.state.thumbnail) {
+			if (this.state.thumbnailDataUri) {
 				pushImage({
-					src: this.state.thumbnail,
+					src: this.state.thumbnailDataUri,
 					className: exifImageOrientationMap[this.state.orientation]
 				});
 			} else {
@@ -88,10 +122,23 @@ class Picture extends React.Component {
 		} else if (this.state.stage === 'error') {
 			pushImage({src: 'warning.svg'});
 		}
-		return React.createElement(this.props.className === 'thumb' ? 'li' : 'div', {
-			className: 'picture ' + (this.props.className || ''),
-			onClick: this.props.onClick
-		}, ...children);
+		if (!thumb && this.state.details && (this.state.details.length > 0)) {
+			children.push(React.createElement(
+				'ul', {
+					className: 'details'
+				},
+				this.state.details.map(detail => {
+					return React.createElement('li', {
+						key: detail
+					}, detail);
+				})
+			));
+		}
+		return React.createElement(
+			thumb ? 'li' : 'div', {
+				className: 'picture ' + (this.props.className || ''),
+				onClick: this.props.onClick
+			}, ...children);
 	}
 }
 

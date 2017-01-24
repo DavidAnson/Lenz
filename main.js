@@ -88,9 +88,30 @@ ipc.createServer(ipcMain, 'getExif', (arg, reply) => {
 			return exif;
 		})
 		.then(exif => {
+			exif = exif || {};
+			const exifExif = exif.exif || {};
+			const exifGps = exif.gps || {};
+			const exifImage = exif.image || {};
+			const exifThumbnail = exif.thumbnail || {};
+			const gpsLatitude = exifGps.GPSLatitude && (exifGps.GPSLatitude.length === 3) && exifGps.GPSLatitudeRef &&
+				`${exifGps.GPSLatitude[0]}\u00b0 ${exifGps.GPSLatitude[1]}' ${exifGps.GPSLatitude[2]}" ${exifGps.GPSLatitudeRef}`;
+			const gpsLongitude = exifGps.GPSLongitude && (exifGps.GPSLongitude.length === 3) && exifGps.GPSLongitudeRef &&
+				`${exifGps.GPSLongitude[0]}\u00b0 ${exifGps.GPSLongitude[1]}' ${exifGps.GPSLongitude[2]}" ${exifGps.GPSLongitudeRef}`;
+			const modifyDate = exifImage.ModifyDate &&
+				(exifImage.ModifyDate.valueOf() + (exifImage.ModifyDate.getTimezoneOffset() * 60 * 1000));
 			reply({
-				orientation: exif && exif.image && exif.image.Orientation,
-				thumbnail: exif && exif.thumbnail && exif.thumbnail.buffer
+				exposureTime: exifExif.ExposureTime,
+				flash: exifExif.Flash,
+				fNumber: exifExif.FNumber,
+				focalLength: exifExif.FocalLength,
+				gpsLatitude,
+				gpsLongitude,
+				iso: exifExif.ISO,
+				make: exifImage.Make,
+				model: exifImage.Model,
+				modifyDate,
+				orientation: exifImage.Orientation,
+				thumbnail: exifThumbnail.buffer
 			});
 		});
 });
