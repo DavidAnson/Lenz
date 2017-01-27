@@ -3,11 +3,13 @@
 const {ipcRenderer, remote} = require('electron');
 const fs = require('fs');
 const path = require('path');
+const url = require('url');
 const Datauri = require('datauri');
 const pify = require('pify');
 const React = require('react');
 const ReactDOM = require('react-dom');
 const ipc = require('./ipc.js');
+const packageJson = require('./package.json');
 
 const fsReaddir = pify(fs.readdir);
 const dialog = remote.dialog;
@@ -164,6 +166,11 @@ class Page extends React.Component {
 				},
 				'Open Folder'),
 			React.createElement(
+				'button', {
+					onClick: () => this.aboutDialog()
+				},
+				'About'),
+			React.createElement(
 				'ul',
 				null,
 				this.state.pictures.map((picture, index) => React.createElement(
@@ -232,6 +239,28 @@ class Page extends React.Component {
 					pictures
 				});
 			});
+	}
+
+	aboutDialog() {
+		this.about = new remote.BrowserWindow({
+			title: packageJson.name,
+			parent: remote.getCurrentWindow(),
+			width: 300,
+			height: 300,
+			modal: true,
+			minimizable: false,
+			resizable: false
+		});
+		this.about.setMenu(null);
+		this.about.loadURL(url.format({
+			pathname: path.join(__dirname, 'about.html'),
+			protocol: 'file:',
+			slashes: true
+		}));
+		// this.about.webContents.openDevTools();
+		this.about.on('closed', () => {
+			this.about = null;
+		});
 	}
 }
 
