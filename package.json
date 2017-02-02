@@ -1,10 +1,14 @@
 {
-  "name": "Loupe",
+  "name": "Lenz",
   "version": "0.1.0",
-  "description": "A simple app for reviewing photos and picking favorites.",
+  "description": "A simple, cross-platform app for reviewing photos and picking favorites.",
   "author": {
     "name": "David Anson",
     "url": "https://dlaa.me/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DavidAnson/Lenz"
   },
   "license": "MIT",
   "main": "main.js",
