@@ -58,13 +58,13 @@ ipc.createServer(ipcMain, 'getExif', (arg, reply) => {
 					.then(fd => {
 						const thumbnailOffset = exif.thumbnail.ThumbnailOffset;
 						const thumbnailLength = exif.thumbnail.ThumbnailLength;
-						const buffer = new Buffer(thumbnailLength);
+						const buffer = Buffer.alloc(thumbnailLength);
 						const exifOffset = 12; // sizeof(JPEG header) + sizeof(APP1 header) + sizeof(Exif header)
 						return fsRead(fd, buffer, 0, thumbnailLength, exifOffset + thumbnailOffset)
 							.then(() => {
 								if ((thumbnailLength >= 4) &&
-									(buffer[0] === 0xff) && (buffer[1] === 0xd8) &&
-									(buffer[thumbnailLength - 2] === 0xff) && (buffer[thumbnailLength - 1] === 0xd9)) {
+									(buffer[0] === 0xFF) && (buffer[1] === 0xD8) &&
+									(buffer[thumbnailLength - 2] === 0xFF) && (buffer[thumbnailLength - 1] === 0xD9)) {
 									exif.thumbnail.buffer = buffer;
 								}
 							})

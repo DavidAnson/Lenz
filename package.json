@@ -18,18 +18,17 @@
   },
   "dependencies": {
     "datauri": "^1.0.5",
-    "fast-exif": "^0.2.0",
-    "pify": "^2.3.0",
-    "react": "^15.4.1",
-    "react-dom": "^15.4.1"
+    "fast-exif": "^1.0.1",
+    "pify": "^3.0.0",
+    "react": "^15.6.1",
+    "react-dom": "^15.6.1"
   },
   "devDependencies": {
-    "@types/electron": "^1.4.30",
-    "@types/pify": "0.0.28",
-    "@types/react": "^0.14.55",
-    "@types/react-dom": "^0.14.19",
-    "electron": "^1.4.13",
-    "xo": "^0.17.1"
+    "@types/pify": "^0.0.28",
+    "@types/react": "^15.0.38",
+    "@types/react-dom": "^15.5.1",
+    "electron": "^1.6.11",
+    "xo": "^0.18.2"
   },
   "xo": {
     "envs": [
@@ -38,6 +37,7 @@
     ],
     "esnext": true,
     "rules": {
+      "capitalized-comments": "off",
       "linebreak-style": "off"
     }
   }
