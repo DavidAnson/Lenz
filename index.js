@@ -28,12 +28,14 @@ class Picture extends React.Component {
 		const {exif} = props.picture;
 		this.state = {
 			stage: exif ? 'loaded' : 'loading',
-			orientation: exif ? exif.orientation : null,
-			details: exif ? exif.details : null
 		};
 	}
 
 	render() {
+		const {exif} = this.props.picture;
+		const orientation = exif ? exif.orientation : null;
+		const details = exif ? exif.details : null;
+		const thumbnailDataUri = exif ? exif.thumbnailDataUri : null;
 		if (this.state.stage === 'loading') {
 			getExifIpc(this.props.picture.file, exif => {
 				const {exposureTime, flash, fNumber, focalLength, gpsLatitude, gpsLongitude, iso, make, model, modifyDate, orientation, thumbnail} = exif;
@@ -79,14 +81,10 @@ class Picture extends React.Component {
 					details
 				};
 				this.setState({
-					stage: 'preview',
-					orientation,
-					thumbnailDataUri,
-					details
+					stage: 'preview'
 				});
 			});
 		}
-		const thumb = (this.props.className === 'thumb');
 		const children = [];
 		const pushImage = props => {
 			props.title = path.basename(this.props.picture.file);
@@ -95,10 +93,10 @@ class Picture extends React.Component {
 		if (this.state.stage === 'loading') {
 			pushImage({src: 'waiting.svg'});
 		} else if (this.state.stage === 'preview') {
-			if (this.state.thumbnailDataUri) {
+			if (thumbnailDataUri) {
 				pushImage({
-					src: this.state.thumbnailDataUri,
-					className: exifImageOrientationMap[this.state.orientation]
+					src: thumbnailDataUri,
+					className: exifImageOrientationMap[orientation]
 				});
 			} else {
 				pushImage({src: 'waiting.svg'});
@@ -116,7 +114,7 @@ class Picture extends React.Component {
 		} else if (this.state.stage === 'loaded') {
 			pushImage({
 				src: this.props.picture.file,
-				className: exifImageOrientationMap[this.state.orientation],
+				className: exifImageOrientationMap[orientation],
 				onError: () => this.setState({
 					stage: 'error'
 				})
@@ -124,12 +122,13 @@ class Picture extends React.Component {
 		} else if (this.state.stage === 'error') {
 			pushImage({src: 'warning.svg'});
 		}
-		if (!thumb && this.state.details && (this.state.details.length > 0)) {
+		const thumb = (this.props.className === 'thumb');
+		if (!thumb && details && (details.length > 0)) {
 			children.push(React.createElement(
 				'ul', {
 					className: 'details'
 				},
-				this.state.details.map(detail => {
+				details.map(detail => {
 					return React.createElement('li', {
 						key: detail
 					}, detail);
@@ -137,7 +136,7 @@ class Picture extends React.Component {
 			));
 		}
 		return React.createElement(
-			thumb ? 'li' : 'div', {
+			'div', {
 				className: 'picture ' + (this.props.className || ''),
 				onClick: this.props.onClick
 			}, ...children);
@@ -154,48 +153,65 @@ class Page extends React.Component {
 	}
 
 	render() {
-		const zoomed = (this.state.index !== -1);
 		const children = [];
 		children.push(React.createElement(
 			'div', {
-				className: zoomed ? 'hidden' : null
+				className: 'frame'
 			},
 			React.createElement(
-				'button', {
-					onClick: () => this.openFolder()
+				'div', {
+					className: 'banner'
 				},
-				'Open Folder'),
+				React.createElement(
+					'button', {
+						onClick: () => this.openFolder()
+					},
+					'Open Folder'),
+				React.createElement(
+					'button', {
+						onClick: () => this.aboutDialog()
+					},
+					'About')
+			),
 			React.createElement(
-				'button', {
-					onClick: () => this.aboutDialog()
+				'div', {
+					className: 'content'
 				},
-				'About'),
-			React.createElement(
-				'ul',
-				null,
-				this.state.pictures.map((picture, index) => React.createElement(
-					Picture, {
-						key: picture.file,
-						picture,
-						className: 'thumb',
-						onClick: () => {
-							this.showPicture(index);
-						}
-					}
-				))
+				React.createElement(
+					'ul', {
+						className: 'list'
+					},
+					this.state.pictures.map((picture, index) =>
+						React.createElement(
+							'li', {
+								key: picture.file,
+							},
+							React.createElement(
+								Picture, {
+									picture,
+									className: 'thumb',
+									onClick: () => {
+										this.showPicture(index);
+									}
+								}
+							)
+						)
+					)
+				),
+				React.createElement(
+					'div', {
+						className: 'current'
+					},
+					(this.state.index === -1) ?
+						null :
+						React.createElement(
+							Picture, {
+								picture: this.state.pictures[this.state.index],
+							}
+						)
+				)
 			)
 		));
-		if (zoomed) {
-			const picture = this.state.pictures[this.state.index];
-			children.push(React.createElement(
-				Picture, {
-					picture,
-					onClick: () => {
-						this.showPicture(-1);
-					}
-				}
-			));
-		}
 		return React.createElement('div', {
 			className: 'page'
 		}, ...children);
@@ -236,7 +252,8 @@ class Page extends React.Component {
 						};
 					});
 				this.setState({
-					pictures
+					pictures,
+					index: 0
 				});
 			});
 	}

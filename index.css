@@ -1,15 +1,14 @@
 :root {
-	--picture-size: 200px;
-	--picture-inset: 5px;
+	--picture-size: 150px;
 }
-@media (max-width: 500px), (max-height: 500px) {
+@media (max-width: 500px) {
 	:root {
 		--picture-size: 100px;
 	}
 }
-@media (min-width: 1000px), (min-height: 1000px) {
+@media (min-width: 1000px) {
 	:root {
-		--picture-size: 300px;
+		--picture-size: 200px;
 	}
 }
 
@@ -30,8 +29,29 @@ ul {
 	padding: 0px;
 	list-style-type: none;
 }
-li {
-	padding: var(--picture-inset);
+
+.frame {
+	height: 100%;
+	display: flex;
+	flex-flow: column;
+}
+.banner {
+	flex: 0 0 auto;
+}
+.content {
+	flex: 1 1 auto;
+	display: flex;
+	flex-flow: row;
+}
+.list {
+	flex: 0 0 auto;
+	overflow-y: scroll;
+}
+.list > li {
+	margin-bottom: 1px;
+}
+.current {
+	flex: 1 1 auto;
 }
 
 .picture {
@@ -42,13 +62,13 @@ li {
 	vertical-align: top;
 	width: 100%;
 	height: 100%;
-	margin: 0px;
+	padding: 1px;
+	box-sizing: border-box;
 	position: relative;
 }
 .thumb {
 	width: var(--picture-size);
 	height: var(--picture-size);
-	margin: 0px 4px 4px 0px;
 }
 
 .details {
@@ -63,15 +83,6 @@ li {
 }
 .details > li {
 	padding: 2px;
-}
-
-div > img.rotate-none, div > img.rotate-flip {
-	max-width: calc(100vw - var(--picture-inset));
-	max-height: calc(100vh - var(--picture-inset));
-}
-div > img.rotate-cw, div > img.rotate-ccw {
-	max-width: calc(100vh - var(--picture-inset));
-	max-height: calc(100vw - var(--picture-inset));
 }
 
 /*image-orientation: from-image; Not available in Chrome yet*/
