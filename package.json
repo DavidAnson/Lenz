@@ -19,6 +19,7 @@
   "dependencies": {
     "datauri": "^1.0.5",
     "fast-exif": "^1.0.1",
+    "fraction.js": "^4.0.3",
     "pify": "^3.0.0",
     "react": "^15.6.1",
     "react-dom": "^15.6.1"

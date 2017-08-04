@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const url = require('url');
 const fastExif = require('fast-exif');
+const Fraction = require('fraction.js');
 const pify = require('pify');
 const ipc = require('./ipc.js');
 const packageJson = require('./package.json');
@@ -93,22 +94,25 @@ ipc.createServer(ipcMain, 'getExif', (arg, reply) => {
 			const exifGps = exif.gps || {};
 			const exifImage = exif.image || {};
 			const exifThumbnail = exif.thumbnail || {};
+			const exposureTime = exifExif.ExposureTime ? (new Fraction(exifExif.ExposureTime)).toFraction() : null;
 			const gpsLatitude = exifGps.GPSLatitude && (exifGps.GPSLatitude.length === 3) && exifGps.GPSLatitudeRef &&
 				`${exifGps.GPSLatitude[0]}\u00b0 ${exifGps.GPSLatitude[1]}' ${exifGps.GPSLatitude[2]}" ${exifGps.GPSLatitudeRef}`;
 			const gpsLongitude = exifGps.GPSLongitude && (exifGps.GPSLongitude.length === 3) && exifGps.GPSLongitudeRef &&
 				`${exifGps.GPSLongitude[0]}\u00b0 ${exifGps.GPSLongitude[1]}' ${exifGps.GPSLongitude[2]}" ${exifGps.GPSLongitudeRef}`;
+			const make = (exifImage.Make || '').replace(/\0/g, '');
+			const model = (exifImage.Model || '').replace(/\0/g, '');
 			const modifyDate = exifImage.ModifyDate &&
 				(exifImage.ModifyDate.valueOf() + (exifImage.ModifyDate.getTimezoneOffset() * 60 * 1000));
 			reply({
-				exposureTime: exifExif.ExposureTime,
+				exposureTime,
 				flash: exifExif.Flash,
 				fNumber: exifExif.FNumber,
 				focalLength: exifExif.FocalLength,
 				gpsLatitude,
 				gpsLongitude,
 				iso: exifExif.ISO,
-				make: exifImage.Make,
-				model: exifImage.Model,
+				make,
+				model,
 				modifyDate,
 				orientation: exifImage.Orientation,
 				thumbnail: exifThumbnail.buffer

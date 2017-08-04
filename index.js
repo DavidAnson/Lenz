@@ -27,19 +27,23 @@ class Picture extends React.Component {
 		super(props);
 		const {exif} = props.picture;
 		this.state = {
-			stage: exif ? 'loaded' : 'loading',
+			stage: exif ? 'loaded' : 'loading'
 		};
 	}
 
 	render() {
-		const {exif} = this.props.picture;
+		const picture = this.props.picture;
+		const {exif} = picture;
 		const orientation = exif ? exif.orientation : null;
 		const details = exif ? exif.details : null;
 		const thumbnailDataUri = exif ? exif.thumbnailDataUri : null;
+		const file = path.basename(picture.file);
 		if (this.state.stage === 'loading') {
-			getExifIpc(this.props.picture.file, exif => {
+			getExifIpc(picture.file, exif => {
 				const {exposureTime, flash, fNumber, focalLength, gpsLatitude, gpsLongitude, iso, make, model, modifyDate, orientation, thumbnail} = exif;
-				const details = [];
+				const details = [
+					file
+				];
 				if (fNumber) {
 					details.push(`F-number: \u0192/${fNumber}`);
 				}
@@ -75,7 +79,7 @@ class Picture extends React.Component {
 					datauri.format('.jpg', thumbnail);
 					thumbnailDataUri = datauri.content;
 				}
-				this.props.picture.exif = {
+				picture.exif = {
 					orientation,
 					thumbnailDataUri,
 					details
@@ -87,7 +91,7 @@ class Picture extends React.Component {
 		}
 		const children = [];
 		const pushImage = props => {
-			props.title = path.basename(this.props.picture.file);
+			props.title = file;
 			children.push(React.createElement('img', props));
 		};
 		if (this.state.stage === 'loading') {
@@ -102,7 +106,7 @@ class Picture extends React.Component {
 				pushImage({src: 'waiting.svg'});
 			}
 			pushImage({
-				src: this.props.picture.file,
+				src: picture.file,
 				className: 'hidden',
 				onLoad: () => this.setState({
 					stage: 'loaded'
@@ -113,7 +117,7 @@ class Picture extends React.Component {
 			});
 		} else if (this.state.stage === 'loaded') {
 			pushImage({
-				src: this.props.picture.file,
+				src: picture.file,
 				className: exifImageOrientationMap[orientation],
 				onError: () => this.setState({
 					stage: 'error'
@@ -184,7 +188,7 @@ class Page extends React.Component {
 					this.state.pictures.map((picture, index) =>
 						React.createElement(
 							'li', {
-								key: picture.file,
+								key: picture.file
 							},
 							React.createElement(
 								Picture, {
@@ -206,7 +210,7 @@ class Page extends React.Component {
 						null :
 						React.createElement(
 							Picture, {
-								picture: this.state.pictures[this.state.index],
+								picture: this.state.pictures[this.state.index]
 							}
 						)
 				)
