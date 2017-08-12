@@ -48,13 +48,15 @@ ul {
 	overflow-y: scroll;
 }
 .list > li {
+	width: var(--picture-size);
+	height: var(--picture-size);
 	margin-bottom: 1px;
 }
 .current {
 	flex: 1 1 auto;
 }
 
-.picture {
+.image {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -65,10 +67,6 @@ ul {
 	padding: 1px;
 	box-sizing: border-box;
 	position: relative;
-}
-.thumb {
-	width: var(--picture-size);
-	height: var(--picture-size);
 }
 
 .details {
@@ -83,17 +81,6 @@ ul {
 }
 .details > li {
 	padding: 2px;
-}
-
-/*image-orientation: from-image; Not available in Chrome yet*/
-img.rotate-flip {
-	transform: rotate(180deg);
-}
-img.rotate-cw {
-	transform: rotate(90deg);
-}
-img.rotate-ccw {
-	transform: rotate(270deg);
 }
 
 .hidden {

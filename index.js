@@ -15,19 +15,19 @@ const fsReaddir = pify(fs.readdir);
 const dialog = remote.dialog;
 const getExifIpc = ipc.createClient(ipcRenderer, 'getExif');
 const imageRe = /\.(bmp|gif|png|jpeg|jpg|jxr|webp)$/i;
+/* image-orientation: from-image; Not available in Chrome yet */
 const exifImageOrientationMap = {
-	1: 'rotate-none',
-	3: 'rotate-flip',
-	6: 'rotate-cw',
-	8: 'rotate-ccw'
+	1: '',
+	3: 'rotate(180deg)',
+	6: 'rotate(90deg)',
+	8: 'rotate(270deg)'
 };
 
-class Picture extends React.Component {
+class ImagePreview extends React.Component {
 	constructor(props) {
 		super(props);
-		const {exif} = props.picture;
 		this.state = {
-			stage: exif ? 'loaded' : 'loading'
+			stage: 'loading'
 		};
 	}
 
@@ -35,9 +35,17 @@ class Picture extends React.Component {
 		const picture = this.props.picture;
 		const {exif} = picture;
 		const orientation = exif ? exif.orientation : null;
-		const details = exif ? exif.details : null;
 		const thumbnailDataUri = exif ? exif.thumbnailDataUri : null;
 		const file = path.basename(picture.file);
+		const setStage = stage => {
+			picture.stage = stage;
+			this.setState({
+				stage
+			});
+			if (this.props.setStage) {
+				this.props.setStage();
+			}
+		};
 		if (this.state.stage === 'loading') {
 			getExifIpc(picture.file, exif => {
 				const {exposureTime, flash, fNumber, focalLength, gpsLatitude, gpsLongitude, iso, make, model, modifyDate, orientation, thumbnail} = exif;
@@ -84,9 +92,7 @@ class Picture extends React.Component {
 					thumbnailDataUri,
 					details
 				};
-				this.setState({
-					stage: 'preview'
-				});
+				setStage('preview');
 			});
 		}
 		const children = [];
@@ -100,7 +106,9 @@ class Picture extends React.Component {
 			if (thumbnailDataUri) {
 				pushImage({
 					src: thumbnailDataUri,
-					className: exifImageOrientationMap[orientation]
+					style: {
+						transform: exifImageOrientationMap[orientation || 1]
+					}
 				});
 			} else {
 				pushImage({src: 'waiting.svg'});
@@ -108,26 +116,108 @@ class Picture extends React.Component {
 			pushImage({
 				src: picture.file,
 				className: 'hidden',
-				onLoad: () => this.setState({
-					stage: 'loaded'
-				}),
-				onError: () => this.setState({
-					stage: 'error'
-				})
+				onLoad: () => {
+					setStage('loaded');
+				},
+				onError: () => {
+					setStage('error');
+				}
 			});
 		} else if (this.state.stage === 'loaded') {
 			pushImage({
 				src: picture.file,
-				className: exifImageOrientationMap[orientation],
-				onError: () => this.setState({
-					stage: 'error'
-				})
+				style: {
+					transform: exifImageOrientationMap[orientation || 1]
+				},
+				onError: () => {
+					setStage('error');
+				}
 			});
 		} else if (this.state.stage === 'error') {
 			pushImage({src: 'warning.svg'});
 		}
-		const thumb = (this.props.className === 'thumb');
-		if (!thumb && details && (details.length > 0)) {
+		return React.createElement(
+			'div', {
+				className: 'image',
+				onClick: this.props.onClick
+			}, ...children);
+	}
+}
+
+class ImageDetail extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			outerWidth: 1,
+			outerHeight: 1,
+			innerWidth: 1,
+			innerHeight: 1
+		};
+		this.onResize = () => {
+			this.forceUpdate();
+		};
+	}
+
+	componentDidMount() {
+		window.addEventListener('resize', this.onResize);
+	}
+	componentWillUnmount() {
+		window.removeEventListener('resize', this.onResize);
+	}
+
+	render() {
+		const picture = this.props.picture;
+		const {exif} = picture;
+		const orientation = exif ? exif.orientation : null;
+		const details = exif ? exif.details : null;
+		const thumbnailDataUri = exif ? exif.thumbnailDataUri : null;
+		const children = [];
+		const pushImage = props => {
+			props.title = path.basename(picture.file);
+			children.push(React.createElement('img', props));
+		};
+		if (this.props.stage === 'loading') {
+			pushImage({src: 'waiting.svg'});
+		} else if (this.props.stage === 'preview') {
+			if (thumbnailDataUri) {
+				pushImage({
+					src: thumbnailDataUri,
+					style: {
+						transform: exifImageOrientationMap[orientation || 1]
+					}
+				});
+			} else {
+				pushImage({src: 'waiting.svg'});
+			}
+		} else if (this.props.stage === 'loaded') {
+			let scale = 1;
+			if ((orientation === 6) || (orientation === 8)) {
+				const preScale = Math.min((this.state.outerWidth / this.state.innerWidth), (this.state.outerHeight / this.state.innerHeight));
+				const postScale = Math.min((this.state.outerWidth / this.state.innerHeight), (this.state.outerHeight / this.state.innerWidth));
+				scale = postScale / preScale;
+			}
+			pushImage({
+				src: picture.file,
+				style: {
+					transform: exifImageOrientationMap[orientation || 1] + ` scale(${scale})`
+				},
+				ref: element => {
+					if (element) {
+						const outerWidth = element.clientWidth;
+						const outerHeight = element.clientHeight;
+						if ((this.state.outerWidth !== outerWidth) || (this.state.outerHeight !== outerHeight)) {
+							this.setState({
+								outerWidth,
+								outerHeight
+							});
+						}
+					}
+				}
+			});
+		} else if (this.props.stage === 'error') {
+			pushImage({src: 'warning.svg'});
+		}
+		if (details && (details.length > 0)) {
 			children.push(React.createElement(
 				'ul', {
 					className: 'details'
@@ -141,8 +231,19 @@ class Picture extends React.Component {
 		}
 		return React.createElement(
 			'div', {
-				className: 'picture ' + (this.props.className || ''),
-				onClick: this.props.onClick
+				className: 'image',
+				ref: element => {
+					if (element) {
+						const innerWidth = element.clientWidth;
+						const innerHeight = element.clientHeight;
+						if ((this.state.innerWidth !== innerWidth) || (this.state.innerHeight !== innerHeight)) {
+							this.setState({
+								innerWidth,
+								innerHeight
+							});
+						}
+					}
+				}
 			}, ...children);
 	}
 }
@@ -152,7 +253,8 @@ class Page extends React.Component {
 		super(props);
 		this.state = {
 			pictures: [],
-			index: -1
+			index: -1,
+			stage: null
 		};
 	}
 
@@ -191,12 +293,17 @@ class Page extends React.Component {
 								key: picture.file
 							},
 							React.createElement(
-								Picture, {
+								ImagePreview, {
 									picture,
-									className: 'thumb',
 									onClick: () => {
 										this.showPicture(index);
-									}
+									},
+									setStage: (this.state.index === index) ?
+										stage => {
+											this.setState({
+												stage
+											});
+										} : null
 								}
 							)
 						)
@@ -209,8 +316,9 @@ class Page extends React.Component {
 					(this.state.index === -1) ?
 						null :
 						React.createElement(
-							Picture, {
-								picture: this.state.pictures[this.state.index]
+							ImageDetail, {
+								picture: this.state.pictures[this.state.index],
+								stage: this.state.pictures[this.state.index].stage
 							}
 						)
 				)
@@ -257,7 +365,7 @@ class Page extends React.Component {
 					});
 				this.setState({
 					pictures,
-					index: 0
+					index: -1
 				});
 			});
 	}
