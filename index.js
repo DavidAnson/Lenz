@@ -9,6 +9,7 @@ const pify = require('pify');
 const React = require('react');
 const ReactDOM = require('react-dom');
 const ipc = require('./ipc.js');
+const ListBox = require('./listbox.js');
 const packageJson = require('./package.json');
 
 const fsReaddir = pify(fs.readdir);
@@ -270,7 +271,8 @@ class Page extends React.Component {
 				},
 				React.createElement(
 					'button', {
-						onClick: () => this.openFolder()
+						onClick: () => this.openFolder(),
+						autoFocus: true
 					},
 					'Open Folder'),
 				React.createElement(
@@ -284,20 +286,15 @@ class Page extends React.Component {
 					className: 'content'
 				},
 				React.createElement(
-					'ul', {
-						className: 'list'
-					},
-					this.state.pictures.map((picture, index) =>
-						React.createElement(
-							'li', {
-								key: picture.file
-							},
+					ListBox, {
+						items: this.state.pictures,
+						containerClass: 'container',
+						itemClass: 'item',
+						selectedItemClass: 'selectedItem',
+						elementForItem: (picture, index) =>
 							React.createElement(
 								ImagePreview, {
 									picture,
-									onClick: () => {
-										this.showPicture(index);
-									},
 									setStage: (this.state.index === index) ?
 										stage => {
 											this.setState({
@@ -305,9 +302,12 @@ class Page extends React.Component {
 											});
 										} : null
 								}
-							)
-						)
-					)
+							),
+						keyForItem: picture => picture.file,
+						onSelected: selectedIndex => {
+							this.showPicture(selectedIndex);
+						}
+					}
 				),
 				React.createElement(
 					'div', {

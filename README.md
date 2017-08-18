@@ -17,8 +17,6 @@ The name is a contrived combination of [lens](https://en.wikipedia.org/wiki/Came
 
 ## TODO
 
-- Zoom to right, list at left
-- Keyboard accessibility
 - Improved EXIF reading/display
 - UX/styling improvements
 - Test with multiple image files

@@ -43,14 +43,17 @@ ul {
 	display: flex;
 	flex-flow: row;
 }
-.list {
+.container {
 	flex: 0 0 auto;
-	overflow-y: scroll;
+	overflow-y: auto;
 }
-.list > li {
+.item {
 	width: var(--picture-size);
 	height: var(--picture-size);
 	margin-bottom: 1px;
+}
+.selectedItem {
+	background-color: rgb(70%, 70%, 70%);
 }
 .current {
 	flex: 1 1 auto;
@@ -60,7 +63,6 @@ ul {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	background-color: rgb(60%, 60%, 60%);
 	vertical-align: top;
 	width: 100%;
 	height: 100%;
