@@ -27,6 +27,10 @@ class ListBox extends React.Component {
 					break;
 				// case 'PageDown':
 				// case 'PageUp':
+				case ' ':
+					this.props.onToggled(selectedIndex);
+					event.preventDefault();
+					break;
 				default:
 					break;
 			}
@@ -39,10 +43,10 @@ class ListBox extends React.Component {
 	}
 
 	componentDidMount() {
-		this.container.addEventListener('keydown', this.onKeydown);
+		window.addEventListener('keydown', this.onKeydown); // this.container
 	}
 	componentWillUnmount() {
-		this.container.removeEventListener('keydown', this.onKeydown);
+		window.removeEventListener('keydown', this.onKeydown); // this.container
 	}
 	componentWillUpdate(nextProps) {
 		const items = nextProps.items || [];
@@ -59,7 +63,6 @@ class ListBox extends React.Component {
 		return React.createElement(
 			'ul', {
 				className: this.props.containerClass,
-				tabIndex: 0,
 				ref: element => {
 					this.container = element;
 				}

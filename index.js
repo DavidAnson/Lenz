@@ -139,7 +139,7 @@ class ImagePreview extends React.Component {
 		}
 		return React.createElement(
 			'div', {
-				className: 'image',
+				className: 'image' + (this.props.picture.favorite ? ' favorite' : ''),
 				onClick: this.props.onClick
 			}, ...children);
 	}
@@ -232,7 +232,7 @@ class ImageDetail extends React.Component {
 		}
 		return React.createElement(
 			'div', {
-				className: 'image',
+				className: 'image' + (this.props.picture.favorite ? ' favorite' : ''),
 				ref: element => {
 					if (element) {
 						const innerWidth = element.clientWidth;
@@ -306,6 +306,10 @@ class Page extends React.Component {
 						keyForItem: picture => picture.file,
 						onSelected: selectedIndex => {
 							this.showPicture(selectedIndex);
+						},
+						onToggled: toggledIndex => {
+							this.state.pictures[toggledIndex].favorite = !this.state.pictures[toggledIndex].favorite;
+							this.forceUpdate();
 						}
 					}
 				),
@@ -360,7 +364,8 @@ class Page extends React.Component {
 					.map(file => {
 						return {
 							file: path.join(directory, file),
-							exif: null
+							exif: null,
+							favorite: false
 						};
 					});
 				this.setState({
