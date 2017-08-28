@@ -9,57 +9,106 @@ class ListBox extends React.Component {
 			selectedIndex: -1
 		};
 		this.container = null;
+		this.visibleItems = [];
 		this.onKeydown = event => {
-			const items = this.props.items || [];
 			let selectedIndex = this.state.selectedIndex;
+			let visibleIndex = this.visibleItems.indexOf(selectedIndex);
+			let handled = true;
 			switch (event.key) {
 				case 'ArrowDown':
-					selectedIndex++;
+					visibleIndex++;
 					break;
 				case 'ArrowUp':
-					selectedIndex--;
+					visibleIndex--;
 					break;
 				case 'End':
-					selectedIndex = items.length - 1;
+					visibleIndex = this.visibleItems.length - 1;
 					break;
 				case 'Home':
-					selectedIndex = 0;
+					visibleIndex = 0;
 					break;
 				// case 'PageDown':
 				// case 'PageUp':
-				case ' ':
-					this.props.onToggled(selectedIndex);
-					event.preventDefault();
-					break;
 				default:
+					handled = false;
 					break;
 			}
-			selectedIndex = Math.max(0, Math.min(items.length - 1, selectedIndex));
-			if (selectedIndex !== this.state.selectedIndex) {
-				this.setSelectedIndex(selectedIndex);
-				event.preventDefault();
+			if (handled) {
+				visibleIndex = Math.max(0, Math.min(this.visibleItems.length - 1, visibleIndex));
+				selectedIndex = this.visibleItems.length ? this.visibleItems[visibleIndex] : -1;
+				if (selectedIndex !== this.state.selectedIndex) {
+					this.setSelectedIndex(selectedIndex);
+					event.preventDefault();
+				}
 			}
 		};
 	}
 
 	componentDidMount() {
-		window.addEventListener('keydown', this.onKeydown); // this.container
+		window.addEventListener('keydown', this.onKeydown); // this.container.addEventListener
 	}
 	componentWillUnmount() {
-		window.removeEventListener('keydown', this.onKeydown); // this.container
+		window.removeEventListener('keydown', this.onKeydown); // this.container.addEventListener
 	}
-	componentWillUpdate(nextProps) {
+	componentWillUpdate(nextProps, nextState) {
 		const items = nextProps.items || [];
-		if ((this.state.selectedIndex === -1) && (items.length > 0)) {
+		this.visibleItems = [];
+		items.forEach((item, index) => {
+			if (this.props.visibilityForItem(item)) {
+				this.visibleItems.push(index);
+			}
+		});
+		const selectedIndex = nextState.selectedIndex || this.state.selectedIndex;
+		if ((selectedIndex === -1) && (this.visibleItems.length > 0)) {
 			this.setSelectedIndex(0);
-		} else if ((this.state.selectedIndex !== -1) && (items.length === 0)) {
+		} else if ((selectedIndex !== -1) && (this.visibleItems.length === 0)) {
 			this.setSelectedIndex(-1);
+		} else if ((selectedIndex !== -1) && (this.visibleItems.indexOf(selectedIndex) === -1)) {
+			let newIndex = -1;
+			items.forEach((item, index) => {
+				if ((this.visibleItems.indexOf(index) !== -1) &&
+					((index <= selectedIndex) || ((index > selectedIndex) && (newIndex === -1)))) {
+					newIndex = index;
+				}
+			});
+			this.setSelectedIndex(newIndex);
 		}
 	}
 
 	render() {
-		const items = this.props.items || [];
 		const selectedIndex = this.state.selectedIndex;
+		const items = this.props.items || [];
+		const lis = items.map((item, index) => {
+			const selected = selectedIndex === index;
+			const visible = this.props.visibilityForItem(item);
+			return React.createElement(
+				'li', {
+					key: this.props.keyForItem(item),
+					className: this.props.itemClass + (selected ? ` ${this.props.selectedItemClass}` : ''),
+					style: visible ? null : {
+						display: 'none'
+					},
+					onClick: () => {
+						this.setSelectedIndex(index);
+					},
+					ref: selected ? element => {
+						if (element) {
+							element.scrollIntoViewIfNeeded();
+						}
+					} : null
+				},
+				this.props.elementForItem(item, index)
+			);
+		});
+		lis.push(React.createElement(
+			'li', {
+				key: 'WIDTH-PLACEHOLDER',
+				className: this.props.itemClass,
+				style: {
+					height: 0
+				}
+			})
+		);
 		return React.createElement(
 			'ul', {
 				className: this.props.containerClass,
@@ -67,23 +116,7 @@ class ListBox extends React.Component {
 					this.container = element;
 				}
 			},
-			items.map((item, index) =>
-				React.createElement(
-					'li', {
-						key: this.props.keyForItem(item),
-						className: this.props.itemClass + ((selectedIndex === index) ? ` ${this.props.selectedItemClass}` : ''),
-						onClick: () => {
-							this.setSelectedIndex(index);
-						},
-						ref: (selectedIndex === index) ? element => {
-							if (element) {
-								element.scrollIntoViewIfNeeded();
-							}
-						} : null
-					},
-					this.props.elementForItem(item, index)
-				)
-			)
+			lis
 		);
 	}
 

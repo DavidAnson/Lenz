@@ -45,7 +45,7 @@ ul {
 }
 .container {
 	flex: 0 0 auto;
-	overflow-y: auto;
+	overflow-y: scroll;
 }
 .item {
 	width: var(--picture-size);

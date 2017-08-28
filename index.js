@@ -255,8 +255,38 @@ class Page extends React.Component {
 		this.state = {
 			pictures: [],
 			index: -1,
-			stage: null
+			favorited: false
 		};
+		this.onKeydown = event => {
+			const index = this.state.index;
+			switch (event.key) {
+				case ' ':
+					this.state.pictures[index].favorite = !this.state.pictures[index].favorite;
+					this.forceUpdate();
+					event.preventDefault();
+					break;
+				case 'a':
+					this.aboutDialog();
+					break;
+				case 'f':
+					this.setState({
+						favorited: !this.state.favorited
+					});
+					break;
+				case 'o':
+					this.openFolder();
+					break;
+				default:
+					break;
+			}
+		};
+	}
+
+	componentDidMount() {
+		window.addEventListener('keydown', this.onKeydown); // this.container.addEventListener
+	}
+	componentWillUnmount() {
+		window.removeEventListener('keydown', this.onKeydown); // this.container.addEventListener
 	}
 
 	render() {
@@ -275,6 +305,30 @@ class Page extends React.Component {
 						autoFocus: true
 					},
 					'Open Folder'),
+				React.createElement(
+					'label',
+					null,
+					React.createElement(
+						'input', {
+							type: 'radio',
+							checked: !this.state.favorited,
+							onChange: () => this.setState({
+								favorited: false
+							})
+						}),
+					'All Photos'),
+				React.createElement(
+					'label',
+					null,
+					React.createElement(
+						'input', {
+							type: 'radio',
+							checked: this.state.favorited,
+							onChange: () => this.setState({
+								favorited: true
+							})
+						}),
+					'Selected Photos'),
 				React.createElement(
 					'button', {
 						onClick: () => this.aboutDialog()
@@ -296,20 +350,15 @@ class Page extends React.Component {
 								ImagePreview, {
 									picture,
 									setStage: (this.state.index === index) ?
-										stage => {
-											this.setState({
-												stage
-											});
+										() => {
+											this.forceUpdate();
 										} : null
 								}
 							),
 						keyForItem: picture => picture.file,
+						visibilityForItem: picture => !this.state.favorited || picture.favorite,
 						onSelected: selectedIndex => {
 							this.showPicture(selectedIndex);
-						},
-						onToggled: toggledIndex => {
-							this.state.pictures[toggledIndex].favorite = !this.state.pictures[toggledIndex].favorite;
-							this.forceUpdate();
 						}
 					}
 				),
