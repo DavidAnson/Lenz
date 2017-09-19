@@ -17,13 +17,13 @@ The name is a contrived combination of [lens](https://en.wikipedia.org/wiki/Came
 
 ## TODO
 
-- Improved EXIF reading/display
+- Captioning support
 - UX/styling improvements
 - Test with multiple image files
-- Create application icon
-- Implement shouldComponentRender
 - Analyze performance
-- Open new window/same view
-- Favorites.txt support
+- Create application icon
+- Improved EXIF reading
 - RAW photo support
+- Links for GPS coordinates
 - Multi-processor support
+- Open new window/same view

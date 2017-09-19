@@ -3,6 +3,7 @@
 const {ipcRenderer, remote} = require('electron');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const url = require('url');
 const Datauri = require('datauri');
 const pify = require('pify');
@@ -13,6 +14,8 @@ const ListBox = require('./listbox.js');
 const packageJson = require('./package.json');
 
 const fsReaddir = pify(fs.readdir);
+const fsReadFile = pify(fs.readFile);
+const fsWriteFile = pify(fs.writeFile);
 const dialog = remote.dialog;
 const getExifIpc = ipc.createClient(ipcRenderer, 'getExif');
 const imageRe = /\.(bmp|gif|png|jpeg|jpg|jxr|webp)$/i;
@@ -23,6 +26,8 @@ const exifImageOrientationMap = {
 	6: 'rotate(90deg)',
 	8: 'rotate(270deg)'
 };
+const encodingUtf8 = {encoding: 'utf8'};
+const favoritesTxt = 'Favorites.txt';
 
 class ImagePreview extends React.Component {
 	constructor(props) {
@@ -262,6 +267,7 @@ class Page extends React.Component {
 			switch (event.key) {
 				case ' ':
 					this.state.pictures[index].favorite = !this.state.pictures[index].favorite;
+					this.saveFavorites();
 					this.forceUpdate();
 					event.preventDefault();
 					break;
@@ -280,6 +286,8 @@ class Page extends React.Component {
 					break;
 			}
 		};
+		this.directory = null;
+		this.savePromise = null;
 	}
 
 	componentDidMount() {
@@ -400,21 +408,37 @@ class Page extends React.Component {
 					return this.readFolder(directories[0]);
 				}
 			})
-			.catch(err => {
-				dialog.showErrorBox(err.code || 'Oops', err.message);
-			});
+			.catch(this.showError);
 	}
 
 	readFolder(directory) {
-		return fsReaddir(directory)
-			.then(files => {
-				const pictures = files
+		this.directory = directory;
+		return Promise.all([
+			fsReaddir(directory),
+			fsReadFile(path.join(directory, favoritesTxt), encodingUtf8)
+				.catch(() => {
+					return ''; // Ignore Favorites.txt read errors
+				})
+		])
+			.then(results => {
+				const [files, favorites] = results;
+				const filesAndCaptions = new Map(files.map(file => [file, undefined]));
+				const favoritesRe = /^"(.+?)"(?:[^\n\S]+(.+?))?$/gm;
+				let match = null;
+				while ((match = favoritesRe.exec(favorites)) !== null) {
+					const [, file, caption] = match;
+					filesAndCaptions.set(file, caption || null);
+				}
+				const sortedFiles = Array.from(filesAndCaptions.keys()).sort((a, b) => a.localeCompare(b));
+				const pictures = sortedFiles
 					.filter(file => file.match(imageRe))
 					.map(file => {
+						const caption = filesAndCaptions.get(file);
 						return {
 							file: path.join(directory, file),
 							exif: null,
-							favorite: false
+							caption,
+							favorite: caption !== undefined
 						};
 					});
 				this.setState({
@@ -422,6 +446,26 @@ class Page extends React.Component {
 					index: -1
 				});
 			});
+	}
+
+	saveFavorites() {
+		const lines = this.state.pictures
+			.filter(picture => picture.favorite)
+			.map(picture => {
+				const basename = path.basename(picture.file);
+				const caption = picture.caption;
+				return `"${basename}"` + (caption ? ` ${caption}` : '');
+			});
+		const promise = (this.savePromise || Promise.resolve()).then(() => {
+			return fsWriteFile(path.join(this.directory, favoritesTxt), lines.join(os.EOL), encodingUtf8)
+				.catch(this.showError)
+				.then(() => {
+					if (promise === this.savePromise) {
+						this.savePromise = null;
+					}
+				});
+		});
+		this.savePromise = promise;
 	}
 
 	aboutDialog() {
@@ -444,6 +488,10 @@ class Page extends React.Component {
 		this.about.on('closed', () => {
 			this.about = null;
 		});
+	}
+
+	showError(err) {
+		dialog.showErrorBox(err.code || 'Oops', err.message);
 	}
 }
 
