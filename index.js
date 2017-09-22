@@ -1,6 +1,6 @@
 'use strict';
 
-const {ipcRenderer, remote} = require('electron');
+const {ipcRenderer, remote, shell} = require('electron');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
@@ -77,15 +77,17 @@ class ImagePreview extends React.Component {
 				if (modifyDate) {
 					details.push(`Date: ${(new Date(modifyDate)).toLocaleString()}`);
 				}
-				if (gpsLatitude && gpsLongitude) {
-					details.push(`GPS: ${gpsLatitude} ${gpsLongitude}`);
-				}
 				if (make || model) {
 					let value = model || make;
 					if (value && make && !value.startsWith(make)) {
 						value = `${make} ${value}`;
 					}
 					details.push(`Camera: ${value}`);
+				}
+				if (gpsLatitude && gpsLongitude) {
+					details.gpsLabel = `GPS: ${gpsLatitude} ${gpsLongitude}`;
+					// https://developers.google.com/maps/documentation/urls/guide
+					details.gpsUri = `https://www.google.com/maps/place/${gpsLatitude.replace(/ /g, '')}+${gpsLongitude.replace(/ /g, '')}`;
 				}
 				let thumbnailDataUri = null;
 				if (thumbnail) {
@@ -224,15 +226,29 @@ class ImageDetail extends React.Component {
 			pushImage({src: 'warning.svg'});
 		}
 		if (details && (details.length > 0)) {
+			const listItems = details.map(detail => {
+				return React.createElement('li', {
+					key: detail
+				}, detail);
+			});
+			if (details.gpsUri && details.gpsLabel) {
+				listItems.push(
+					React.createElement('li', {
+						key: details.gpsLabel
+					},
+					React.createElement('a', {
+						href: '#',
+						onClick: e => {
+							e.preventDefault();
+							shell.openExternal(details.gpsUri);
+						}
+					}, details.gpsLabel)));
+			}
 			children.push(React.createElement(
 				'ul', {
 					className: 'details'
 				},
-				details.map(detail => {
-					return React.createElement('li', {
-						key: detail
-					}, detail);
-				})
+				listItems
 			));
 		}
 		return React.createElement(

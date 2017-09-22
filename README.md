@@ -24,6 +24,5 @@ The name is a contrived combination of [lens](https://en.wikipedia.org/wiki/Came
 - Create application icon
 - Improved EXIF reading
 - RAW photo support
-- Links for GPS coordinates
 - Multi-processor support
 - Open new window/same view
