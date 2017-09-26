@@ -1,6 +1,6 @@
 'use strict';
 
-const {shell} = require('electron');
+const {remote, shell} = require('electron');
 const packageJson = require('./package.json');
 
 function openExternal() {
@@ -36,3 +36,10 @@ groups.forEach(group => {
 	group.forEach(item => document.write(`<p class="${className}">${item}</p>`));
 });
 document.write('</div>');
+
+document.onkeydown = function () {
+	const event = window.event;
+	if (event.key === 'Escape') {
+		remote.getCurrentWindow().close();
+	}
+};
