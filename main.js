@@ -9,6 +9,7 @@ const Fraction = require('fraction.js');
 const pify = require('pify');
 const ipc = require('./ipc.js');
 const packageJson = require('./package.json');
+const configurationJson = require('./configuration.json');
 
 const fsOpen = pify(fs.open);
 const fsRead = pify(fs.read);
@@ -27,7 +28,9 @@ function createWindow() {
 		slashes: true
 	}));
 
-	// win.webContents.openDevTools();
+	if (configurationJson.openDevTools) {
+		win.webContents.openDevTools();
+	}
 
 	win.on('closed', () => {
 		win = null;

@@ -17,7 +17,6 @@ The name is a contrived combination of [lens](https://en.wikipedia.org/wiki/Came
 
 ## TODO
 
-- Configuration file
 - UX/styling improvements
 - Test with multiple image files
 - Analyze performance

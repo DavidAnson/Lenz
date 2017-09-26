@@ -12,6 +12,7 @@ const ReactDOM = require('react-dom');
 const ipc = require('./ipc.js');
 const ListBox = require('./listbox.js');
 const packageJson = require('./package.json');
+const configurationJson = require('./configuration.json');
 
 const fsReaddir = pify(fs.readdir);
 const fsReadFile = pify(fs.readFile);
@@ -315,6 +316,9 @@ class Page extends React.Component {
 
 	componentDidMount() {
 		window.addEventListener('keydown', this.onKeydown); // this.container.addEventListener
+		if (configurationJson.openFolder) {
+			this.readFolder(configurationJson.openFolder);
+		}
 	}
 	componentWillUnmount() {
 		window.removeEventListener('keydown', this.onKeydown); // this.container.addEventListener
