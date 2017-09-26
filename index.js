@@ -238,8 +238,8 @@ class ImageDetail extends React.Component {
 					},
 					React.createElement('a', {
 						href: '#',
-						onClick: e => {
-							e.preventDefault();
+						onClick: event => {
+							event.preventDefault();
 							shell.openExternal(details.gpsUri);
 						}
 					}, details.gpsLabel)));
@@ -280,12 +280,19 @@ class Page extends React.Component {
 		};
 		this.onKeydown = event => {
 			const index = this.state.index;
+			const picture = this.state.pictures[index];
 			switch (event.key) {
 				case ' ':
-					this.state.pictures[index].favorite = !this.state.pictures[index].favorite;
+					event.preventDefault();
+					picture.favorite = !picture.favorite;
+					if (picture.favorite) {
+						picture.caption = picture.captionSaved || '';
+					} else {
+						picture.captionSaved = picture.caption;
+						picture.caption = '';
+					}
 					this.saveFavorites();
 					this.forceUpdate();
-					event.preventDefault();
 					break;
 				case 'a':
 					this.aboutDialog();
@@ -390,14 +397,34 @@ class Page extends React.Component {
 					'div', {
 						className: 'current'
 					},
-					(this.state.index === -1) ?
-						null :
-						React.createElement(
-							ImageDetail, {
-								picture: this.state.pictures[this.state.index],
-								stage: this.state.pictures[this.state.index].stage
+					React.createElement(
+						'div', {
+							className: 'photo'
+						},
+						(this.state.index === -1) ?
+							null :
+							React.createElement(
+								ImageDetail, {
+									picture: this.state.pictures[this.state.index],
+									stage: this.state.pictures[this.state.index].stage
+								}
+							)
+					),
+					React.createElement(
+						'input', {
+							type: 'text',
+							className: 'caption',
+							value: (this.state.index === -1) ? '' : this.state.pictures[this.state.index].caption,
+							onKeyDown: event => event.stopPropagation(),
+							onChange: event => {
+								if (this.state.index !== -1) {
+									this.state.pictures[this.state.index].caption = event.target.value;
+									this.state.pictures[this.state.index].favorite = true;
+								}
+								this.saveFavorites();
+								this.forceUpdate();
 							}
-						)
+						})
 				)
 			)
 		));
@@ -453,7 +480,7 @@ class Page extends React.Component {
 						return {
 							file: path.join(directory, file),
 							exif: null,
-							caption,
+							caption: caption || '',
 							favorite: caption !== undefined
 						};
 					});

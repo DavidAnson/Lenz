@@ -17,12 +17,14 @@ The name is a contrived combination of [lens](https://en.wikipedia.org/wiki/Came
 
 ## TODO
 
-- Captioning support
+- Configuration file
 - UX/styling improvements
 - Test with multiple image files
 - Analyze performance
+- Throttle file writes
 - Create application icon
 - Improved EXIF reading
+- HEIF photo support
 - RAW photo support
 - Multi-processor support
 - Open new window/same view
