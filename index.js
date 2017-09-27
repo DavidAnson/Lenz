@@ -277,7 +277,7 @@ class Page extends React.Component {
 		this.state = {
 			pictures: [],
 			index: -1,
-			favorited: false
+			showing: 0
 		};
 		this.onKeydown = event => {
 			const index = this.state.index;
@@ -300,7 +300,7 @@ class Page extends React.Component {
 					break;
 				case 'f':
 					this.setState({
-						favorited: !this.state.favorited
+						showing: (this.state.showing + 1) % 3
 					});
 					break;
 				case 'o':
@@ -346,9 +346,9 @@ class Page extends React.Component {
 					React.createElement(
 						'input', {
 							type: 'radio',
-							checked: !this.state.favorited,
+							checked: this.state.showing === 0,
 							onChange: () => this.setState({
-								favorited: false
+								showing: 0
 							})
 						}),
 					'All Photos'),
@@ -358,12 +358,24 @@ class Page extends React.Component {
 					React.createElement(
 						'input', {
 							type: 'radio',
-							checked: this.state.favorited,
+							checked: this.state.showing === 1,
 							onChange: () => this.setState({
-								favorited: true
+								showing: 1
 							})
 						}),
 					'Selected Photos'),
+				React.createElement(
+					'label',
+					null,
+					React.createElement(
+						'input', {
+							type: 'radio',
+							checked: this.state.showing === 2,
+							onChange: () => this.setState({
+								showing: 2
+							})
+						}),
+					'Captioned Photos'),
 				React.createElement(
 					'button', {
 						onClick: () => this.aboutDialog()
@@ -391,7 +403,10 @@ class Page extends React.Component {
 								}
 							),
 						keyForItem: picture => picture.file,
-						visibilityForItem: picture => !this.state.favorited || picture.favorite,
+						visibilityForItem: picture =>
+							(this.state.showing === 0) ||
+							((this.state.showing === 1) && picture.favorite) ||
+							((this.state.showing === 2) && picture.favorite && picture.caption),
 						onSelected: selectedIndex => {
 							this.showPicture(selectedIndex);
 						}
