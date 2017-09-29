@@ -17,7 +17,7 @@ The name is a contrived combination of [lens](https://en.wikipedia.org/wiki/Came
 
 ## TODO
 
-- UX/styling improvements
+- Update dependencies
 - Test with multiple image files
 - Analyze performance
 - Throttle file writes
@@ -25,5 +25,5 @@ The name is a contrived combination of [lens](https://en.wikipedia.org/wiki/Came
 - Improved EXIF reading
 - HEIF photo support
 - RAW photo support
+- Delete 0-byte Favorites
 - Multi-processor support
-- Open new window/same view

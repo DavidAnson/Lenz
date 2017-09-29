@@ -341,41 +341,44 @@ class Page extends React.Component {
 					},
 					'Open Folder'),
 				React.createElement(
-					'label',
+					'div',
 					null,
 					React.createElement(
-						'input', {
-							type: 'radio',
-							checked: this.state.showing === 0,
-							onChange: () => this.setState({
-								showing: 0
-							})
-						}),
-					'All Photos'),
-				React.createElement(
-					'label',
-					null,
+						'label',
+						null,
+						React.createElement(
+							'input', {
+								type: 'radio',
+								checked: this.state.showing === 0,
+								onChange: () => this.setState({
+									showing: 0
+								})
+							}),
+						'All Photos'),
 					React.createElement(
-						'input', {
-							type: 'radio',
-							checked: this.state.showing === 1,
-							onChange: () => this.setState({
-								showing: 1
-							})
-						}),
-					'Selected Photos'),
-				React.createElement(
-					'label',
-					null,
+						'label',
+						null,
+						React.createElement(
+							'input', {
+								type: 'radio',
+								checked: this.state.showing === 1,
+								onChange: () => this.setState({
+									showing: 1
+								})
+							}),
+						'Selected'),
 					React.createElement(
-						'input', {
-							type: 'radio',
-							checked: this.state.showing === 2,
-							onChange: () => this.setState({
-								showing: 2
-							})
-						}),
-					'Captioned Photos'),
+						'label',
+						null,
+						React.createElement(
+							'input', {
+								type: 'radio',
+								checked: this.state.showing === 2,
+								onChange: () => this.setState({
+									showing: 2
+								})
+							}),
+						'Captioned')),
 				React.createElement(
 					'button', {
 						onClick: () => this.aboutDialog()
@@ -434,12 +437,11 @@ class Page extends React.Component {
 							type: 'text',
 							className: 'caption',
 							value: (this.state.index === -1) ? '' : this.state.pictures[this.state.index].caption,
+							disabled: (this.state.index === -1),
 							onKeyDown: event => event.stopPropagation(),
 							onChange: event => {
-								if (this.state.index !== -1) {
-									this.state.pictures[this.state.index].caption = event.target.value;
-									this.state.pictures[this.state.index].favorite = true;
-								}
+								this.state.pictures[this.state.index].caption = event.target.value;
+								this.state.pictures[this.state.index].favorite = true;
 								this.saveFavorites();
 								this.forceUpdate();
 							}
@@ -459,6 +461,11 @@ class Page extends React.Component {
 	}
 
 	openFolder() {
+		this.setState({
+			pictures: [],
+			index: -1,
+			showing: 0
+		});
 		new Promise(resolve => {
 			dialog.showOpenDialog(
 				remote.getCurrentWindow(), {
@@ -504,8 +511,7 @@ class Page extends React.Component {
 						};
 					});
 				this.setState({
-					pictures,
-					index: -1
+					pictures
 				});
 			});
 	}
