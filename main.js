@@ -27,6 +27,9 @@ function createWindow() {
 		protocol: 'file:',
 		slashes: true
 	}));
+	win.webContents.on('will-navigate', event => {
+		event.preventDefault();
+	});
 
 	if (configurationJson.openDevTools) {
 		win.webContents.openDevTools();

@@ -438,6 +438,7 @@ class Page extends React.Component {
 							className: 'caption',
 							value: (this.state.index === -1) ? '' : this.state.pictures[this.state.index].caption,
 							disabled: (this.state.index === -1),
+							spellCheck: true,
 							onKeyDown: event => event.stopPropagation(),
 							onChange: event => {
 								this.state.pictures[this.state.index].caption = event.target.value;
@@ -566,3 +567,12 @@ class Page extends React.Component {
 ReactDOM.render(
 	React.createElement(Page, null),
 	document.getElementById('root'));
+
+// Prevent drag/drop
+['dragenter', 'dragover', 'drop'].forEach(type => {
+	document.addEventListener(type, event => {
+		event.preventDefault();
+		event.dataTransfer.dropEffect = 'none';
+		event.dataTransfer.effectAllowed = 'none';
+	});
+});
