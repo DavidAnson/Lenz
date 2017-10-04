@@ -54,8 +54,23 @@ app.on('activate', () => {
 	}
 });
 
+function gpsCoordinatesToString(coordinates, reference) {
+	let result;
+	if (coordinates && (coordinates.length > 0) && !Number.isNaN(coordinates[0]) && reference) {
+		result = `${coordinates[0]}\u00b0`;
+		if (coordinates[1] && !Number.isNaN(coordinates[1])) {
+			result += ` ${coordinates[1]}'`;
+			if (coordinates[2] && !Number.isNaN(coordinates[2])) {
+				result += ` ${coordinates[2]}"`;
+			}
+		}
+		result += ` ${reference}`;
+	}
+	return result;
+}
+
 ipc.createServer(ipcMain, 'getExif', (arg, reply) => {
-	fastExif.read(arg)
+	fastExif.read(arg, true)
 		.catch(() => {
 			// Transform errors to empty exif data
 		})
@@ -101,10 +116,8 @@ ipc.createServer(ipcMain, 'getExif', (arg, reply) => {
 			const exifImage = exif.image || {};
 			const exifThumbnail = exif.thumbnail || {};
 			const exposureTime = exifExif.ExposureTime ? (new Fraction(exifExif.ExposureTime)).toFraction() : null;
-			const gpsLatitude = exifGps.GPSLatitude && (exifGps.GPSLatitude.length === 3) && exifGps.GPSLatitudeRef &&
-				`${exifGps.GPSLatitude[0]}\u00b0 ${exifGps.GPSLatitude[1]}' ${exifGps.GPSLatitude[2]}" ${exifGps.GPSLatitudeRef}`;
-			const gpsLongitude = exifGps.GPSLongitude && (exifGps.GPSLongitude.length === 3) && exifGps.GPSLongitudeRef &&
-				`${exifGps.GPSLongitude[0]}\u00b0 ${exifGps.GPSLongitude[1]}' ${exifGps.GPSLongitude[2]}" ${exifGps.GPSLongitudeRef}`;
+			const gpsLatitude = gpsCoordinatesToString(exifGps.GPSLatitude, exifGps.GPSLatitudeRef);
+			const gpsLongitude = gpsCoordinatesToString(exifGps.GPSLongitude, exifGps.GPSLongitudeRef);
 			const make = (exifImage.Make || '').replace(/\0/g, '');
 			const model = (exifImage.Model || '').replace(/\0/g, '');
 			const modifyDate = exifImage.ModifyDate &&
