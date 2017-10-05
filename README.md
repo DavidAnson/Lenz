@@ -17,12 +17,11 @@ The name is a contrived combination of [lens](https://en.wikipedia.org/wiki/Came
 
 ## TODO
 
-- Test with multiple image files
 - Analyze performance
 - Throttle file writes
+- Delete 0-byte Favorites
 - Create application icon
-- Improved EXIF reading
+- Improve EXIF reading
 - HEIF photo support
 - RAW photo support
-- Delete 0-byte Favorites
 - Multi-processor support

@@ -71,7 +71,7 @@ class ImagePreview extends React.Component {
 				if (focalLength) {
 					details.push(`Focal length: ${focalLength}mm`);
 				}
-				if (flash) {
+				if (flash !== undefined) {
 					const value = (flash % 2) ? 'On' : 'Off';
 					details.push(`Flash: ${value}`);
 				}
