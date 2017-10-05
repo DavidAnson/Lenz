@@ -30,7 +30,7 @@ const exifImageOrientationMap = {
 const encodingUtf8 = {encoding: 'utf8'};
 const favoritesTxt = 'Favorites.txt';
 
-class ImagePreview extends React.Component {
+class ImagePreview extends React.PureComponent {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -153,7 +153,7 @@ class ImagePreview extends React.Component {
 	}
 }
 
-class ImageDetail extends React.Component {
+class ImageDetail extends React.PureComponent {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -271,7 +271,7 @@ class ImageDetail extends React.Component {
 	}
 }
 
-class Page extends React.Component {
+class Page extends React.PureComponent {
 	constructor(props) {
 		super(props);
 		this.state = {

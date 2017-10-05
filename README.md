@@ -17,7 +17,6 @@ The name is a contrived combination of [lens](https://en.wikipedia.org/wiki/Came
 
 ## TODO
 
-- Analyze performance
 - Throttle file writes
 - Delete 0-byte Favorites
 - Create application icon

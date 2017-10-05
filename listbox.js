@@ -2,7 +2,7 @@
 
 const React = require('react');
 
-class ListBox extends React.Component {
+class ListBox extends React.PureComponent {
 	constructor(props) {
 		super(props);
 		this.state = {
