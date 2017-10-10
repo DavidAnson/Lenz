@@ -421,16 +421,21 @@ class Page extends React.PureComponent {
 					},
 					React.createElement(
 						'div', {
-							className: 'photo'
+							className: 'constraint'
 						},
-						(this.state.index === -1) ?
-							null :
-							React.createElement(
-								ImageDetail, {
-									picture: this.state.pictures[this.state.index],
-									stage: this.state.pictures[this.state.index].stage
-								}
-							)
+						React.createElement(
+							'div', {
+								className: 'photo'
+							},
+							(this.state.index === -1) ?
+								null :
+								React.createElement(
+									ImageDetail, {
+										picture: this.state.pictures[this.state.index],
+										stage: this.state.pictures[this.state.index].stage
+									}
+								)
+						),
 					),
 					React.createElement(
 						'input', {

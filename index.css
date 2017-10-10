@@ -65,6 +65,12 @@ ul {
 	flex: 1 1 100%;
 	display: flex;
 	flex-flow: column;
+	overflow-y: hidden;
+}
+.constraint {
+	display: flex;
+	flex-flow: row;
+	height: 100%;
 }
 .photo {
 	flex: 1 1 100%;
