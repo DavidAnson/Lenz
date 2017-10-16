@@ -399,6 +399,7 @@ class Page extends React.PureComponent {
 							React.createElement(
 								ImagePreview, {
 									picture,
+									favorite: picture.favorite, // Update if changed
 									setStage: (this.state.index === index) ?
 										() => {
 											this.forceUpdate();
@@ -432,6 +433,7 @@ class Page extends React.PureComponent {
 								React.createElement(
 									ImageDetail, {
 										picture: this.state.pictures[this.state.index],
+										favorite: this.state.pictures[this.state.index].favorite, // Update if changed
 										stage: this.state.pictures[this.state.index].stage
 									}
 								)
