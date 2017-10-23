@@ -296,14 +296,17 @@ class Page extends React.PureComponent {
 					this.forceUpdate();
 					break;
 				case 'a':
+				case 'A':
 					this.aboutDialog();
 					break;
 				case 'f':
+				case 'F':
 					this.setState({
 						showing: (this.state.showing + 1) % 3
 					});
 					break;
 				case 'o':
+				case 'O':
 					this.openFolder();
 					break;
 				default:
