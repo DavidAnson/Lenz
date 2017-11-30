@@ -21,14 +21,14 @@
     "fast-exif": "~1.0.1",
     "fraction.js": "~4.0.3",
     "pify": "~3.0.0",
-    "react": "~16.0.0",
-    "react-dom": "~16.0.0"
+    "react": "~16.2.0",
+    "react-dom": "~16.2.0"
   },
   "devDependencies": {
     "@types/pify": "~3.0.0",
-    "@types/react": "~16.0.7",
-    "@types/react-dom": "~15.5.5",
-    "electron": "~1.7.8",
+    "@types/react": "~16.0.25",
+    "@types/react-dom": "~16.0.3",
+    "electron": "~1.7.9",
     "xo": "~0.18.2"
   },
   "xo": {
