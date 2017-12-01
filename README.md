@@ -18,7 +18,6 @@ The name is a contrived combination of [lens](https://en.wikipedia.org/wiki/Came
 ## TODO
 
 - Throttle file writes
-- Delete 0-byte Favorites
 - Create application icon
 - Improve EXIF reading
 - HEIF photo support

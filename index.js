@@ -14,8 +14,10 @@ const ListBox = require('./listbox.js');
 const packageJson = require('./package.json');
 const configurationJson = require('./configuration.json');
 
+const fsAccess = pify(fs.access);
 const fsReaddir = pify(fs.readdir);
 const fsReadFile = pify(fs.readFile);
+const fsUnlink = pify(fs.unlink);
 const fsWriteFile = pify(fs.writeFile);
 const dialog = remote.dialog;
 const getExifIpc = ipc.createClient(ipcRenderer, 'getExif');
@@ -536,7 +538,14 @@ class Page extends React.PureComponent {
 				return `"${basename}"` + (caption ? ` ${caption}` : '');
 			});
 		const promise = (this.savePromise || Promise.resolve()).then(() => {
-			return fsWriteFile(path.join(this.directory, favoritesTxt), lines.join(os.EOL), encodingUtf8)
+			const favoritesPath = path.join(this.directory, favoritesTxt);
+			const operation = (lines.length === 0) ?
+				fsAccess(favoritesPath)
+					.then(() => {
+						return fsUnlink(favoritesPath);
+					}, () => {}) :
+				fsWriteFile(favoritesPath, lines.join(os.EOL), encodingUtf8);
+			return operation
 				.catch(this.showError)
 				.then(() => {
 					if (promise === this.savePromise) {
