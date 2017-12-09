@@ -6,6 +6,7 @@ const path = require('path');
 const os = require('os');
 const url = require('url');
 const Datauri = require('datauri');
+const delay = require('delay');
 const pify = require('pify');
 const React = require('react');
 const ReactDOM = require('react-dom');
@@ -315,18 +316,25 @@ class Page extends React.PureComponent {
 					break;
 			}
 		};
+		this.beforeunload = event => {
+			if (this.savePending) {
+				event.returnValue = false;
+			}
+		};
+		this.savePending = false;
 		this.directory = null;
-		this.savePromise = null;
 	}
 
 	componentDidMount() {
-		window.addEventListener('keydown', this.onKeydown); // this.container.addEventListener
+		window.addEventListener('keydown', this.onKeydown);
+		window.addEventListener('beforeunload', this.beforeunload);
 		if (configurationJson.openFolder) {
 			this.readFolder(configurationJson.openFolder);
 		}
 	}
 	componentWillUnmount() {
-		window.removeEventListener('keydown', this.onKeydown); // this.container.addEventListener
+		window.removeEventListener('keydown', this.onKeydown);
+		window.removeEventListener('beforeunload', this.beforeunload);
 	}
 
 	render() {
@@ -474,6 +482,9 @@ class Page extends React.PureComponent {
 	}
 
 	openFolder() {
+		if (this.savePending) {
+			return;
+		}
 		this.setState({
 			pictures: [],
 			index: -1,
@@ -530,30 +541,40 @@ class Page extends React.PureComponent {
 	}
 
 	saveFavorites() {
-		const lines = this.state.pictures
-			.filter(picture => picture.favorite)
-			.map(picture => {
-				const basename = path.basename(picture.file);
-				const caption = picture.caption;
-				return `"${basename}"` + (caption ? ` ${caption}` : '');
+		if (this.saveDelayPromise) {
+			this.saveDelayPromise.cancel();
+		}
+		this.savePending = true;
+		this.saveActionPromise = (this.saveActionPromise || Promise.resolve())
+			.then(() => {
+				this.saveDelayPromise = delay(500);
+				return this.saveDelayPromise;
+			})
+			.then(() => {
+				const favoritesPath = path.join(this.directory, favoritesTxt);
+				const lines = this.state.pictures
+					.filter(picture => picture.favorite)
+					.map(picture => {
+						const basename = path.basename(picture.file);
+						const caption = picture.caption;
+						return `"${basename}"` + (caption ? ` ${caption}` : '');
+					});
+				return (lines.length === 0) ?
+					fsAccess(favoritesPath)
+						.then(() => {
+							return fsUnlink(favoritesPath);
+						}, () => {}) :
+					fsWriteFile(favoritesPath, lines.join(os.EOL), encodingUtf8);
+			})
+			.then(() => {
+				this.savePending = false;
+			})
+			.catch(err => {
+				this.savePending = false;
+				if (!(err instanceof delay.CancelError)) {
+					this.showError(err);
+				}
 			});
-		const promise = (this.savePromise || Promise.resolve()).then(() => {
-			const favoritesPath = path.join(this.directory, favoritesTxt);
-			const operation = (lines.length === 0) ?
-				fsAccess(favoritesPath)
-					.then(() => {
-						return fsUnlink(favoritesPath);
-					}, () => {}) :
-				fsWriteFile(favoritesPath, lines.join(os.EOL), encodingUtf8);
-			return operation
-				.catch(this.showError)
-				.then(() => {
-					if (promise === this.savePromise) {
-						this.savePromise = null;
-					}
-				});
-		});
-		this.savePromise = promise;
 	}
 
 	aboutDialog() {

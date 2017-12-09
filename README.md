@@ -17,9 +17,7 @@ The name is a contrived combination of [lens](https://en.wikipedia.org/wiki/Came
 
 ## TODO
 
-- Throttle file writes
 - Create application icon
 - Improve EXIF reading
 - HEIF photo support
-- RAW photo support
 - Multi-processor support
