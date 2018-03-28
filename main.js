@@ -57,7 +57,7 @@ app.on('activate', () => {
 function gpsCoordinatesToString(coordinates, reference) {
 	let result;
 	if (coordinates && (coordinates.length > 0) && !Number.isNaN(coordinates[0]) && reference) {
-		result = `${coordinates[0]}\u00b0`;
+		result = `${coordinates[0]}\u00B0`;
 		if (coordinates[1] && !Number.isNaN(coordinates[1])) {
 			result += ` ${coordinates[1]}'`;
 			if (coordinates[2] && !Number.isNaN(coordinates[2])) {

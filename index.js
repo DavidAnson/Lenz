@@ -173,6 +173,7 @@ class ImageDetail extends React.PureComponent {
 	componentDidMount() {
 		window.addEventListener('resize', this.onResize);
 	}
+
 	componentWillUnmount() {
 		window.removeEventListener('resize', this.onResize);
 	}
@@ -332,6 +333,7 @@ class Page extends React.PureComponent {
 			this.readFolder(configurationJson.openFolder);
 		}
 	}
+
 	componentWillUnmount() {
 		window.removeEventListener('keydown', this.onKeydown);
 		window.removeEventListener('beforeunload', this.beforeunload);

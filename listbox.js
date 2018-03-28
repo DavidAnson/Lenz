@@ -47,9 +47,11 @@ class ListBox extends React.PureComponent {
 	componentDidMount() {
 		window.addEventListener('keydown', this.onKeydown); // this.container.addEventListener
 	}
+
 	componentWillUnmount() {
 		window.removeEventListener('keydown', this.onKeydown); // this.container.addEventListener
 	}
+
 	componentWillUpdate(nextProps, nextState) {
 		const items = nextProps.items || [];
 		this.visibleItems = [];

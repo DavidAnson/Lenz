@@ -17,20 +17,20 @@
     "test": "xo"
   },
   "dependencies": {
-    "datauri": "~1.0.5",
+    "datauri": "~1.1.0",
     "delay": "~2.0.0",
     "fast-exif": "~1.0.1",
-    "fraction.js": "~4.0.3",
+    "fraction.js": "~4.0.4",
     "pify": "~3.0.0",
     "react": "~16.2.0",
     "react-dom": "~16.2.0"
   },
   "devDependencies": {
-    "@types/pify": "~3.0.0",
-    "@types/react": "~16.0.25",
-    "@types/react-dom": "~16.0.3",
-    "electron": "~1.7.9",
-    "xo": "~0.18.2"
+    "@types/pify": "~3.0.1",
+    "@types/react": "~16.1.0",
+    "@types/react-dom": "~16.0.4",
+    "electron": "~1.8.4",
+    "xo": "~0.20.3"
   },
   "xo": {
     "envs": [
@@ -39,8 +39,7 @@
     ],
     "esnext": true,
     "rules": {
-      "capitalized-comments": "off",
-      "linebreak-style": "off"
+      "capitalized-comments": "off"
     }
   }
 }

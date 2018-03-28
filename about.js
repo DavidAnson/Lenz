@@ -37,9 +37,9 @@ groups.forEach(group => {
 });
 document.write('</div>');
 
-document.onkeydown = function () {
+document.addEventListener('keydown', () => {
 	const event = window.event;
 	if (event.key === 'Escape') {
 		remote.getCurrentWindow().close();
 	}
-};
+});
