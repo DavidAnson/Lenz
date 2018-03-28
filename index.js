@@ -26,8 +26,12 @@ const imageRe = /\.(bmp|gif|png|jpeg|jpg|jxr|webp)$/i;
 /* image-orientation: from-image; Not available in Chrome yet */
 const exifImageOrientationMap = {
 	1: '',
+	2: 'scale(-1, 1)',
 	3: 'rotate(180deg)',
+	4: 'scale(1, -1)',
+	5: 'rotate(90deg) scale(1, -1)',
 	6: 'rotate(90deg)',
+	7: 'rotate(270deg) scale(1, -1)',
 	8: 'rotate(270deg)'
 };
 const encodingUtf8 = {encoding: 'utf8'};
@@ -204,7 +208,7 @@ class ImageDetail extends React.PureComponent {
 			}
 		} else if (this.props.stage === 'loaded') {
 			let scale = 1;
-			if ((orientation === 6) || (orientation === 8)) {
+			if ((orientation >= 5) && (orientation <= 8)) {
 				const preScale = Math.min((this.state.outerWidth / this.state.innerWidth), (this.state.outerHeight / this.state.innerHeight));
 				const postScale = Math.min((this.state.outerWidth / this.state.innerHeight), (this.state.outerHeight / this.state.innerWidth));
 				scale = postScale / preScale;
