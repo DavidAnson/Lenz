@@ -11,6 +11,10 @@ class ListBox extends React.PureComponent {
 		this.container = null;
 		this.visibleItems = [];
 		this.onKeydown = event => {
+			if (event.target.tagName === 'INPUT') {
+				// Don't (double-)handle keys that target INPUT elements
+				return;
+			}
 			let selectedIndex = this.state.selectedIndex;
 			let visibleIndex = this.visibleItems.indexOf(selectedIndex);
 			let handled = true;
