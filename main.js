@@ -69,14 +69,14 @@ function gpsCoordinatesToString(coordinates, reference) {
 	return result;
 }
 
-ipc.createServer(ipcMain, 'getExif', (arg, reply) => {
-	fastExif.read(arg, true)
+ipc.createServer(ipcMain, 'getExif', (file, reply) => {
+	fastExif.read(file, true)
 		.catch(() => {
 			// Transform errors to empty exif data
 		})
 		.then(exif => {
 			if (exif && exif.thumbnail && exif.thumbnail.ThumbnailOffset && exif.thumbnail.ThumbnailLength) {
-				return fsOpen(arg, 'r')
+				return fsOpen(file, 'r')
 					.then(fd => {
 						const thumbnailOffset = exif.thumbnail.ThumbnailOffset;
 						const thumbnailLength = exif.thumbnail.ThumbnailLength;
