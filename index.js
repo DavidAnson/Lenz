@@ -7,6 +7,7 @@ const os = require('os');
 const url = require('url');
 const Datauri = require('datauri');
 const delay = require('delay');
+const pCancelable = require('p-cancelable');
 const pify = require('pify');
 const React = require('react');
 const ReactDOM = require('react-dom');
@@ -20,6 +21,7 @@ const fsReaddir = pify(fs.readdir);
 const fsReadFile = pify(fs.readFile);
 const fsUnlink = pify(fs.unlink);
 const fsWriteFile = pify(fs.writeFile);
+const cancelableDelay = pCancelable.fn(delay);
 const dialog = remote.dialog;
 const getExifIpc = ipc.createClient(ipcRenderer, 'getExif');
 const imageRe = /\.(bmp|gif|png|jpeg|jpg|jxr|webp)$/i;
@@ -553,7 +555,7 @@ class Page extends React.PureComponent {
 		this.savePending = true;
 		this.saveActionPromise = (this.saveActionPromise || Promise.resolve())
 			.then(() => {
-				this.saveDelayPromise = delay(500);
+				this.saveDelayPromise = cancelableDelay(500);
 				return this.saveDelayPromise;
 			})
 			.then(() => {
@@ -577,7 +579,7 @@ class Page extends React.PureComponent {
 			})
 			.catch(err => {
 				this.savePending = false;
-				if (!(err instanceof delay.CancelError)) {
+				if (!this.saveDelayPromise.isCanceled) {
 					this.showError(err);
 				}
 			});
