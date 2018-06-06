@@ -16,13 +16,13 @@ const ListBox = require('./listbox.js');
 const packageJson = require('./package.json');
 const configurationJson = require('./configuration.json');
 
+const {dialog} = remote;
 const fsAccess = pify(fs.access);
 const fsReaddir = pify(fs.readdir);
 const fsReadFile = pify(fs.readFile);
 const fsUnlink = pify(fs.unlink);
 const fsWriteFile = pify(fs.writeFile);
 const cancelableDelay = pCancelable.fn(delay);
-const dialog = remote.dialog;
 const getExifIpc = ipc.createClient(ipcRenderer, 'getExif');
 const imageRe = /\.(bmp|gif|png|jpeg|jpg|jxr|webp)$/i;
 /* image-orientation: from-image; Not available in Chrome yet */
@@ -48,7 +48,7 @@ class ImagePreview extends React.PureComponent {
 	}
 
 	render() {
-		const picture = this.props.picture;
+		const {picture} = this.props;
 		const {exif} = picture;
 		const orientation = exif ? exif.orientation : null;
 		const thumbnailDataUri = exif ? exif.thumbnailDataUri : null;
@@ -185,7 +185,7 @@ class ImageDetail extends React.PureComponent {
 	}
 
 	render() {
-		const picture = this.props.picture;
+		const {picture} = this.props;
 		const {exif} = picture;
 		const orientation = exif ? exif.orientation : null;
 		const details = exif ? exif.details : null;
@@ -290,7 +290,7 @@ class Page extends React.PureComponent {
 			showing: 0
 		};
 		this.onKeydown = event => {
-			const index = this.state.index;
+			const {index} = this.state;
 			const picture = this.state.pictures[index];
 			switch (event.key) {
 				case ' ':
@@ -530,7 +530,7 @@ class Page extends React.PureComponent {
 					const [, file, caption] = match;
 					filesAndCaptions.set(file, caption || null);
 				}
-				const sortedFiles = Array.from(filesAndCaptions.keys()).sort((a, b) => a.localeCompare(b));
+				const sortedFiles = [...filesAndCaptions.keys()].sort((a, b) => a.localeCompare(b));
 				const pictures = sortedFiles
 					.filter(file => file.match(imageRe))
 					.map(file => {
@@ -564,7 +564,7 @@ class Page extends React.PureComponent {
 					.filter(picture => picture.favorite)
 					.map(picture => {
 						const basename = path.basename(picture.file);
-						const caption = picture.caption;
+						const {caption} = picture;
 						return `"${basename}"` + (caption ? ` ${caption}` : '');
 					});
 				return (lines.length === 0) ?

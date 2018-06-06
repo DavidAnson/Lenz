@@ -4,7 +4,7 @@ const {remote, shell} = require('electron');
 const packageJson = require('./package.json');
 
 function openExternal() {
-	const event = window.event;
+	const {event} = window;
 	event.preventDefault();
 	shell.openExternal(event.target.href);
 }
@@ -38,7 +38,7 @@ groups.forEach(group => {
 document.write('</div>');
 
 document.addEventListener('keydown', () => {
-	const event = window.event;
+	const {event} = window;
 	if (event.key === 'Escape') {
 		remote.getCurrentWindow().close();
 	}

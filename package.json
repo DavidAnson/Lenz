@@ -20,18 +20,18 @@
     "datauri": "~1.1.0",
     "delay": "~3.0.0",
     "fast-exif": "~1.0.1",
-    "fraction.js": "~4.0.4",
+    "fraction.js": "~4.0.8",
     "p-cancelable": "~0.4.1",
     "pify": "~3.0.0",
     "react": "~16.2.0",
     "react-dom": "~16.2.0"
   },
   "devDependencies": {
-    "@types/pify": "~3.0.1",
+    "@types/pify": "~3.0.2",
     "@types/react": "~16.1.0",
     "@types/react-dom": "~16.0.4",
     "electron": "~1.8.4",
-    "xo": "~0.20.3"
+    "xo": "~0.21.1"
   },
   "xo": {
     "envs": [

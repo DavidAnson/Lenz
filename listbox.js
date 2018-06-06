@@ -15,7 +15,7 @@ class ListBox extends React.PureComponent {
 				// Don't (double-)handle keys that target INPUT elements
 				return;
 			}
-			let selectedIndex = this.state.selectedIndex;
+			let {selectedIndex} = this.state;
 			let visibleIndex = this.visibleItems.indexOf(selectedIndex);
 			let handled = true;
 			switch (event.key) {
@@ -82,7 +82,7 @@ class ListBox extends React.PureComponent {
 	}
 
 	render() {
-		const selectedIndex = this.state.selectedIndex;
+		const {selectedIndex} = this.state;
 		const items = this.props.items || [];
 		const lis = items.map((item, index) => {
 			const selected = selectedIndex === index;
