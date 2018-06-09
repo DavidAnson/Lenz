@@ -478,9 +478,11 @@ class Page extends React.PureComponent {
 				)
 			)
 		));
-		return React.createElement('div', {
-			className: 'page'
-		}, ...children);
+		return React.createElement(React.StrictMode,
+			null,
+			React.createElement('div', {
+				className: 'page'
+			}, ...children));
 	}
 
 	showPicture(index) {

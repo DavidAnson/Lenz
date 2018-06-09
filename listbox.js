@@ -9,14 +9,14 @@ class ListBox extends React.PureComponent {
 			selectedIndex: -1
 		};
 		this.container = null;
-		this.visibleItems = [];
 		this.onKeydown = event => {
 			if (event.target.tagName === 'INPUT') {
 				// Don't (double-)handle keys that target INPUT elements
 				return;
 			}
 			let {selectedIndex} = this.state;
-			let visibleIndex = this.visibleItems.indexOf(selectedIndex);
+			const visibleItems = ListBox.getVisibleItems(this.props);
+			let visibleIndex = visibleItems.indexOf(selectedIndex);
 			let handled = true;
 			switch (event.key) {
 				case 'ArrowDown':
@@ -26,7 +26,7 @@ class ListBox extends React.PureComponent {
 					visibleIndex--;
 					break;
 				case 'End':
-					visibleIndex = this.visibleItems.length - 1;
+					visibleIndex = visibleItems.length - 1;
 					break;
 				case 'Home':
 					visibleIndex = 0;
@@ -38,8 +38,8 @@ class ListBox extends React.PureComponent {
 					break;
 			}
 			if (handled) {
-				visibleIndex = Math.max(0, Math.min(this.visibleItems.length - 1, visibleIndex));
-				selectedIndex = this.visibleItems.length ? this.visibleItems[visibleIndex] : -1;
+				visibleIndex = Math.max(0, Math.min(visibleItems.length - 1, visibleIndex));
+				selectedIndex = visibleItems.length ? visibleItems[visibleIndex] : -1;
 				if (selectedIndex !== this.state.selectedIndex) {
 					this.setSelectedIndex(selectedIndex);
 					event.preventDefault();
@@ -56,29 +56,30 @@ class ListBox extends React.PureComponent {
 		window.removeEventListener('keydown', this.onKeydown); // this.container.addEventListener
 	}
 
-	componentWillUpdate(nextProps, nextState) {
-		const items = nextProps.items || [];
-		this.visibleItems = [];
-		items.forEach((item, index) => {
-			if (this.props.visibilityForItem(item)) {
-				this.visibleItems.push(index);
-			}
-		});
-		const selectedIndex = nextState.selectedIndex || this.state.selectedIndex;
-		if ((selectedIndex === -1) && (this.visibleItems.length > 0)) {
-			this.setSelectedIndex(0);
-		} else if ((selectedIndex !== -1) && (this.visibleItems.length === 0)) {
-			this.setSelectedIndex(-1);
-		} else if ((selectedIndex !== -1) && (this.visibleItems.indexOf(selectedIndex) === -1)) {
+	static getDerivedStateFromProps(props, state) {
+		const visibleItems = ListBox.getVisibleItems(props);
+		let {selectedIndex} = state;
+		if ((selectedIndex === -1) && (visibleItems.length > 0)) {
+			selectedIndex = 0;
+		} else if ((selectedIndex !== -1) && (visibleItems.length === 0)) {
+			selectedIndex = -1;
+		} else if ((selectedIndex !== -1) && (visibleItems.indexOf(selectedIndex) === -1)) {
 			let newIndex = -1;
-			items.forEach((item, index) => {
-				if ((this.visibleItems.indexOf(index) !== -1) &&
+			for (let index = 0; index < props.items.length; index++) {
+				if ((visibleItems.indexOf(index) !== -1) &&
 					((index <= selectedIndex) || ((index > selectedIndex) && (newIndex === -1)))) {
 					newIndex = index;
 				}
-			});
-			this.setSelectedIndex(newIndex);
+			}
+			selectedIndex = newIndex;
 		}
+		return {
+			selectedIndex
+		};
+	}
+
+	componentDidUpdate() {
+		this.props.onSelected(this.state.selectedIndex);
 	}
 
 	render() {
@@ -131,6 +132,16 @@ class ListBox extends React.PureComponent {
 			selectedIndex
 		});
 		this.props.onSelected(selectedIndex);
+	}
+
+	static getVisibleItems(props) {
+		const visibleItems = [];
+		props.items.forEach((item, index) => {
+			if (props.visibilityForItem(item)) {
+				visibleItems.push(index);
+			}
+		});
+		return visibleItems;
 	}
 }
 
