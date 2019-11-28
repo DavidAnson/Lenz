@@ -1,13 +1,13 @@
 'use strict';
 
-const {app, BrowserWindow, ipcMain} = require('electron');
+const {app, BrowserWindow, Menu} = require('electron');
 const fs = require('fs');
 const path = require('path');
 const url = require('url');
+const {ipcMain: ipc} = require('electron-better-ipc');
 const fastExif = require('fast-exif');
 const Fraction = require('fraction.js');
 const pify = require('pify');
-const ipc = require('./ipc.js');
 const packageJson = require('./package.json');
 const configurationJson = require('./configuration.json');
 
@@ -18,10 +18,13 @@ const fsClose = pify(fs.close);
 let win;
 
 function createWindow() {
+	Menu.setApplicationMenu(null);
 	win = new BrowserWindow({
-		title: packageJson.name
+		title: packageJson.name,
+		webPreferences: {
+			nodeIntegration: true
+		}
 	});
-	win.setMenu(null);
 	win.loadURL(url.format({
 		pathname: path.join(__dirname, 'index.html'),
 		protocol: 'file:',
@@ -69,8 +72,8 @@ function gpsCoordinatesToString(coordinates, reference) {
 	return result;
 }
 
-ipc.createServer(ipcMain, 'getExif', (file, reply) => {
-	fastExif.read(file, true)
+ipc.answerRenderer('getExif', file => {
+	return fastExif.read(file, true)
 		.catch(() => {
 			// Transform errors to empty exif data
 		})
@@ -122,7 +125,7 @@ ipc.createServer(ipcMain, 'getExif', (file, reply) => {
 			const model = (exifImage.Model || '').replace(/\0/g, '');
 			const modifyDate = exifImage.ModifyDate &&
 				(exifImage.ModifyDate.valueOf() + (exifImage.ModifyDate.getTimezoneOffset() * 60 * 1000));
-			reply({
+			return {
 				exposureTime,
 				flash: exifExif.Flash,
 				fNumber: exifExif.FNumber,
@@ -135,6 +138,6 @@ ipc.createServer(ipcMain, 'getExif', (file, reply) => {
 				modifyDate,
 				orientation: exifImage.Orientation,
 				thumbnail: exifThumbnail.buffer
-			});
+			};
 		});
 });

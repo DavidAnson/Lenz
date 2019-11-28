@@ -1,17 +1,17 @@
 'use strict';
 
-const {ipcRenderer, remote, shell} = require('electron');
+const {remote, shell} = require('electron');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const url = require('url');
 const Datauri = require('datauri');
 const delay = require('delay');
+const {ipcRenderer: ipc} = require('electron-better-ipc');
 const pCancelable = require('p-cancelable');
 const pify = require('pify');
 const React = require('react');
 const ReactDOM = require('react-dom');
-const ipc = require('./ipc.js');
 const ListBox = require('./listbox.js');
 const packageJson = require('./package.json');
 const configurationJson = require('./configuration.json');
@@ -23,7 +23,6 @@ const fsReadFile = pify(fs.readFile);
 const fsUnlink = pify(fs.unlink);
 const fsWriteFile = pify(fs.writeFile);
 const cancelableDelay = pCancelable.fn(delay);
-const getExifIpc = ipc.createClient(ipcRenderer, 'getExif');
 const imageRe = /\.(bmp|gif|png|jpeg|jpg|jxr|webp)$/i;
 /* image-orientation: from-image; Not available in Chrome yet */
 const exifImageOrientationMap = {
@@ -63,55 +62,56 @@ class ImagePreview extends React.PureComponent {
 			}
 		};
 		if (this.state.stage === 'loading') {
-			getExifIpc(picture.file, exif => {
-				const {exposureTime, flash, fNumber, focalLength, gpsLatitude, gpsLongitude, iso, make, model, modifyDate, orientation, thumbnail} = exif;
-				const details = [
-					file
-				];
-				if (fNumber) {
-					details.push(`F-number: \u0192/${fNumber}`);
-				}
-				if (exposureTime) {
-					details.push(`Exposure time: ${exposureTime}s`);
-				}
-				if (iso) {
-					details.push(`ISO speed: ${iso}`);
-				}
-				if (focalLength) {
-					details.push(`Focal length: ${focalLength}mm`);
-				}
-				if (flash !== undefined) {
-					const value = (flash % 2) ? 'On' : 'Off';
-					details.push(`Flash: ${value}`);
-				}
-				if (modifyDate) {
-					details.push(`Date: ${(new Date(modifyDate)).toLocaleString()}`);
-				}
-				if (make || model) {
-					let value = model || make;
-					if (value && make && !value.startsWith(make)) {
-						value = `${make} ${value}`;
+			ipc.callMain('getExif', picture.file)
+				.then(exif => {
+					const {exposureTime, flash, fNumber, focalLength, gpsLatitude, gpsLongitude, iso, make, model, modifyDate, orientation, thumbnail} = exif;
+					const details = [
+						file
+					];
+					if (fNumber) {
+						details.push(`F-number: \u0192/${fNumber}`);
 					}
-					details.push(`Camera: ${value}`);
-				}
-				if (gpsLatitude && gpsLongitude) {
-					details.gpsLabel = `GPS: ${gpsLatitude} ${gpsLongitude}`;
-					// https://developers.google.com/maps/documentation/urls/guide
-					details.gpsUri = `https://www.google.com/maps/place/${gpsLatitude.replace(/ /g, '')}+${gpsLongitude.replace(/ /g, '')}`;
-				}
-				let thumbnailDataUri = null;
-				if (thumbnail) {
-					const datauri = new Datauri();
-					datauri.format('.jpg', thumbnail);
-					thumbnailDataUri = datauri.content;
-				}
-				picture.exif = {
-					orientation,
-					thumbnailDataUri,
-					details
-				};
-				setStage('preview');
-			});
+					if (exposureTime) {
+						details.push(`Exposure time: ${exposureTime}s`);
+					}
+					if (iso) {
+						details.push(`ISO speed: ${iso}`);
+					}
+					if (focalLength) {
+						details.push(`Focal length: ${focalLength}mm`);
+					}
+					if (flash !== undefined) {
+						const value = (flash % 2) ? 'On' : 'Off';
+						details.push(`Flash: ${value}`);
+					}
+					if (modifyDate) {
+						details.push(`Date: ${(new Date(modifyDate)).toLocaleString()}`);
+					}
+					if (make || model) {
+						let value = model || make;
+						if (value && make && !value.startsWith(make)) {
+							value = `${make} ${value}`;
+						}
+						details.push(`Camera: ${value}`);
+					}
+					if (gpsLatitude && gpsLongitude) {
+						details.gpsLabel = `GPS: ${gpsLatitude} ${gpsLongitude}`;
+						// https://developers.google.com/maps/documentation/urls/guide
+						details.gpsUri = `https://www.google.com/maps/place/${gpsLatitude.replace(/ /g, '')}+${gpsLongitude.replace(/ /g, '')}`;
+					}
+					let thumbnailDataUri = null;
+					if (thumbnail) {
+						const datauri = new Datauri();
+						datauri.format('.jpg', thumbnail);
+						thumbnailDataUri = datauri.content;
+					}
+					picture.exif = {
+						orientation,
+						thumbnailDataUri,
+						details
+					};
+					setStage('preview');
+				});
 		}
 		const children = [];
 		const pushImage = props => {
@@ -480,9 +480,9 @@ class Page extends React.PureComponent {
 		));
 		return React.createElement(React.StrictMode,
 			null,
-			React.createElement('div', {
-				className: 'page'
-			}, ...children));
+			React.createElement(React.Fragment,
+				null,
+				...children));
 	}
 
 	showPicture(index) {
@@ -500,15 +500,13 @@ class Page extends React.PureComponent {
 			index: -1,
 			showing: 0
 		});
-		new Promise(resolve => {
-			dialog.showOpenDialog(
-				remote.getCurrentWindow(), {
-					properties: ['openDirectory']
-				}, resolve);
+		dialog.showOpenDialog({
+			properties: ['openDirectory']
 		})
-			.then(directories => {
-				if (directories) {
-					return this.readFolder(directories[0]);
+			.then(openDialogResult => {
+				const {canceled, filePaths} = openDialogResult;
+				if (!canceled && (filePaths.length >= 1)) {
+					return this.readFolder(filePaths[0]);
 				}
 			})
 			.catch(this.showError);
@@ -595,7 +593,10 @@ class Page extends React.PureComponent {
 			height: 300,
 			modal: true,
 			minimizable: false,
-			resizable: false
+			resizable: false,
+			webPreferences: {
+				nodeIntegration: true
+			}
 		});
 		this.about.setMenu(null);
 		this.about.loadURL(url.format({
