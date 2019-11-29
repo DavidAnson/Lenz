@@ -110,6 +110,7 @@ class ImagePreview extends React.PureComponent {
 		const children = [];
 		const pushImage = props => {
 			props.title = file;
+			props.loading = 'lazy';
 			children.push(React.createElement('img', props));
 		};
 		if (this.state.stage === 'loading') {
