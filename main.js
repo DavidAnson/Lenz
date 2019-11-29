@@ -1,19 +1,14 @@
 'use strict';
 
 const {app, BrowserWindow, Menu} = require('electron');
-const fs = require('fs');
+const fs = require('fs').promises;
 const path = require('path');
 const url = require('url');
 const {ipcMain: ipc} = require('electron-better-ipc');
 const fastExif = require('fast-exif');
 const Fraction = require('fraction.js');
-const pify = require('pify');
 const packageJson = require('./package.json');
 const configurationJson = require('./configuration.json');
-
-const fsOpen = pify(fs.open);
-const fsRead = pify(fs.read);
-const fsClose = pify(fs.close);
 
 let win;
 
@@ -79,13 +74,13 @@ ipc.answerRenderer('getExif', file => {
 		})
 		.then(exif => {
 			if (exif && exif.thumbnail && exif.thumbnail.ThumbnailOffset && exif.thumbnail.ThumbnailLength) {
-				return fsOpen(file, 'r')
-					.then(fd => {
+				return fs.open(file, 'r')
+					.then(filehandle => {
 						const thumbnailOffset = exif.thumbnail.ThumbnailOffset;
 						const thumbnailLength = exif.thumbnail.ThumbnailLength;
 						const buffer = Buffer.alloc(thumbnailLength);
 						const exifOffset = 12; // sizeof(JPEG header) + sizeof(APP1 header) + sizeof(Exif header)
-						return fsRead(fd, buffer, 0, thumbnailLength, exifOffset + thumbnailOffset)
+						return filehandle.read(buffer, 0, thumbnailLength, exifOffset + thumbnailOffset)
 							.then(() => {
 								if ((thumbnailLength >= 4) &&
 									(buffer[0] === 0xFF) && (buffer[1] === 0xD8) &&
@@ -97,11 +92,11 @@ ipc.answerRenderer('getExif', file => {
 								// Ignore any read errors
 							})
 							.then(() => {
-								return fd;
+								return filehandle;
 							});
 					})
-					.then(fd => {
-						return fsClose(fd);
+					.then(filehandle => {
+						return filehandle.close();
 					})
 					.catch(() => {
 						// Ignore any thumbnail errors

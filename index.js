@@ -1,7 +1,7 @@
 'use strict';
 
 const {remote, shell} = require('electron');
-const fs = require('fs');
+const fs = require('fs').promises;
 const path = require('path');
 const os = require('os');
 const url = require('url');
@@ -9,7 +9,6 @@ const Datauri = require('datauri');
 const delay = require('delay');
 const {ipcRenderer: ipc} = require('electron-better-ipc');
 const pCancelable = require('p-cancelable');
-const pify = require('pify');
 const React = require('react');
 const ReactDOM = require('react-dom');
 const ListBox = require('./listbox.js');
@@ -17,11 +16,6 @@ const packageJson = require('./package.json');
 const configurationJson = require('./configuration.json');
 
 const {dialog} = remote;
-const fsAccess = pify(fs.access);
-const fsReaddir = pify(fs.readdir);
-const fsReadFile = pify(fs.readFile);
-const fsUnlink = pify(fs.unlink);
-const fsWriteFile = pify(fs.writeFile);
 const cancelableDelay = pCancelable.fn(delay);
 const imageRe = /\.(bmp|gif|png|jpeg|jpg|jxr|webp)$/i;
 /* image-orientation: from-image; Not available in Chrome yet */
@@ -515,8 +509,8 @@ class Page extends React.PureComponent {
 	readFolder(directory) {
 		this.directory = directory;
 		return Promise.all([
-			fsReaddir(directory),
-			fsReadFile(path.join(directory, favoritesTxt), encodingUtf8)
+			fs.readdir(directory),
+			fs.readFile(path.join(directory, favoritesTxt), encodingUtf8)
 				.catch(() => {
 					return ''; // Ignore Favorites.txt read errors
 				})
@@ -568,11 +562,11 @@ class Page extends React.PureComponent {
 						return `"${basename}"` + (caption ? ` ${caption}` : '');
 					});
 				return (lines.length === 0) ?
-					fsAccess(favoritesPath)
+					fs.access(favoritesPath)
 						.then(() => {
-							return fsUnlink(favoritesPath);
+							return fs.unlink(favoritesPath);
 						}, () => {}) :
-					fsWriteFile(favoritesPath, lines.join(os.EOL), encodingUtf8);
+					fs.writeFile(favoritesPath, lines.join(os.EOL), encodingUtf8);
 			})
 			.then(() => {
 				this.savePending = false;
