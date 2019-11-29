@@ -17,20 +17,20 @@
     "test": "xo"
   },
   "dependencies": {
-    "datauri": "~1.1.0",
-    "delay": "~3.0.0",
+    "datauri": "~2.0.0",
+    "delay": "~4.3.0",
     "electron-better-ipc": "~0.7.0",
     "fast-exif": "~1.0.1",
-    "fraction.js": "~4.0.8",
-    "p-cancelable": "~0.4.1",
-    "react": "~16.4.0",
-    "react-dom": "~16.4.0"
+    "fraction.js": "~4.0.12",
+    "p-cancelable": "~2.0.0",
+    "react": "~16.12.0",
+    "react-dom": "~16.12.0"
   },
   "devDependencies": {
-    "@types/react": "~16.3.16",
-    "@types/react-dom": "~16.0.6",
+    "@types/react": "~16.9.13",
+    "@types/react-dom": "~16.9.4",
     "electron": "~7.1.2",
-    "xo": "~0.21.1"
+    "xo": "~0.25.3"
   },
   "xo": {
     "envs": [
@@ -39,7 +39,8 @@
     ],
     "esnext": true,
     "rules": {
-      "capitalized-comments": "off"
+      "capitalized-comments": "off",
+      "padding-line-between-statements": "off"
     }
   }
 }

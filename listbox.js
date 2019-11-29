@@ -39,7 +39,7 @@ class ListBox extends React.PureComponent {
 			}
 			if (handled) {
 				visibleIndex = Math.max(0, Math.min(visibleItems.length - 1, visibleIndex));
-				selectedIndex = visibleItems.length ? visibleItems[visibleIndex] : -1;
+				selectedIndex = (visibleItems.length > 0) ? visibleItems[visibleIndex] : -1;
 				if (selectedIndex !== this.state.selectedIndex) {
 					this.setSelectedIndex(selectedIndex);
 					event.preventDefault();
@@ -63,10 +63,10 @@ class ListBox extends React.PureComponent {
 			selectedIndex = 0;
 		} else if ((selectedIndex !== -1) && (visibleItems.length === 0)) {
 			selectedIndex = -1;
-		} else if ((selectedIndex !== -1) && (visibleItems.indexOf(selectedIndex) === -1)) {
+		} else if ((selectedIndex !== -1) && !visibleItems.includes(selectedIndex)) {
 			let newIndex = -1;
 			for (let index = 0; index < props.items.length; index++) {
-				if ((visibleItems.indexOf(index) !== -1) &&
+				if (visibleItems.includes(index) &&
 					((index <= selectedIndex) || ((index > selectedIndex) && (newIndex === -1)))) {
 					newIndex = index;
 				}

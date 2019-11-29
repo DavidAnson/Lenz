@@ -452,7 +452,7 @@ class Page extends React.PureComponent {
 										stage: this.state.pictures[this.state.index].stage
 									}
 								)
-						),
+						)
 					),
 					React.createElement(
 						'input', {
@@ -571,10 +571,10 @@ class Page extends React.PureComponent {
 			.then(() => {
 				this.savePending = false;
 			})
-			.catch(err => {
+			.catch(error => {
 				this.savePending = false;
 				if (!this.saveDelayPromise.isCanceled) {
-					this.showError(err);
+					this.showError(error);
 				}
 			});
 	}
@@ -611,7 +611,7 @@ class Page extends React.PureComponent {
 
 ReactDOM.render(
 	React.createElement(Page, null),
-	document.getElementById('root'));
+	document.querySelector('#root'));
 
 // Prevent drag/drop
 ['dragenter', 'dragover', 'drop'].forEach(type => {
