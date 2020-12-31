@@ -1,6 +1,7 @@
 'use strict';
 
-const {remote, shell} = require('electron');
+const {shell} = require('electron');
+const remote = require('@electron/remote');
 const packageJson = require('./package.json');
 
 function openExternal() {

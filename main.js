@@ -9,6 +9,7 @@ const fastExif = require('fast-exif');
 const Fraction = require('fraction.js');
 const packageJson = require('./package.json');
 const configurationJson = require('./configuration.json');
+require('@electron/remote/main').initialize();
 
 let win;
 
@@ -17,6 +18,7 @@ function createWindow() {
 	win = new BrowserWindow({
 		title: packageJson.name,
 		webPreferences: {
+			enableRemoteModule: true,
 			nodeIntegration: true
 		}
 	});

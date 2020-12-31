@@ -17,20 +17,21 @@
     "test": "xo"
   },
   "dependencies": {
-    "datauri": "~2.0.0",
-    "delay": "~4.3.0",
-    "electron-better-ipc": "~0.7.0",
+    "datauri": "~3.0.0",
+    "delay": "~4.4.0",
+    "electron-better-ipc": "~1.1.1",
     "fast-exif": "~1.0.1",
-    "fraction.js": "~4.0.12",
+    "fraction.js": "~4.0.13",
     "p-cancelable": "~2.0.0",
-    "react": "~16.12.0",
-    "react-dom": "~16.12.0"
+    "react": "~17.0.1",
+    "react-dom": "~17.0.1"
   },
   "devDependencies": {
-    "@types/react": "~16.9.13",
-    "@types/react-dom": "~16.9.4",
-    "electron": "~7.1.2",
-    "xo": "~0.25.3"
+    "@types/react": "~17.0.0",
+    "@types/react-dom": "~17.0.0",
+    "electron": "~11.1.1",
+    "@electron/remote": "~1.0.2",
+    "xo": "~0.36.1"
   },
   "xo": {
     "envs": [

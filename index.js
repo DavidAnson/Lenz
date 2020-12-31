@@ -1,6 +1,7 @@
 'use strict';
 
-const {remote, shell} = require('electron');
+const {shell} = require('electron');
+const remote = require('@electron/remote');
 const fs = require('fs').promises;
 const path = require('path');
 const os = require('os');
@@ -500,7 +501,7 @@ class Page extends React.PureComponent {
 		})
 			.then(openDialogResult => {
 				const {canceled, filePaths} = openDialogResult;
-				if (!canceled && (filePaths.length >= 1)) {
+				if (!canceled && (filePaths.length > 0)) {
 					return this.readFolder(filePaths[0]);
 				}
 			})
@@ -590,6 +591,7 @@ class Page extends React.PureComponent {
 			minimizable: false,
 			resizable: false,
 			webPreferences: {
+				enableRemoteModule: true,
 				nodeIntegration: true
 			}
 		});
