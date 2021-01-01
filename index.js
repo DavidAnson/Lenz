@@ -403,76 +403,61 @@ class Page extends React.PureComponent {
 					'About')
 			),
 			React.createElement(
-				'div', {
-					className: 'content'
-				},
-				React.createElement(
-					ListBox, {
-						items: this.state.pictures,
-						containerClass: 'container',
-						itemClass: 'item',
-						selectedItemClass: 'selectedItem',
-						elementForItem: (picture, index) =>
-							React.createElement(
-								ImagePreview, {
-									picture,
-									favorite: picture.favorite, // Update if changed
-									setStage: (this.state.index === index) ?
-										() => {
-											this.forceUpdate();
-										} : null
-								}
-							),
-						keyForItem: picture => picture.file,
-						visibilityForItem: picture =>
-							(this.state.showing === 0) ||
-							((this.state.showing === 1) && picture.favorite) ||
-							((this.state.showing === 2) && picture.favorite && picture.caption),
-						onSelected: selectedIndex => {
-							this.showPicture(selectedIndex);
-						}
-					}
-				),
-				React.createElement(
-					'div', {
-						className: 'current'
-					},
-					React.createElement(
-						'div', {
-							className: 'constraint'
-						},
+				ListBox, {
+					items: this.state.pictures,
+					containerClass: 'list',
+					itemClass: 'item',
+					selectedItemClass: 'selectedItem',
+					elementForItem: (picture, index) =>
 						React.createElement(
-							'div', {
-								className: 'photo'
-							},
-							(this.state.index === -1) ?
-								null :
-								React.createElement(
-									ImageDetail, {
-										picture: this.state.pictures[this.state.index],
-										favorite: this.state.pictures[this.state.index].favorite, // Update if changed
-										stage: this.state.pictures[this.state.index].stage
-									}
-								)
-						)
-					),
-					React.createElement(
-						'input', {
-							type: 'text',
-							className: 'caption',
-							value: (this.state.index === -1) ? '' : this.state.pictures[this.state.index].caption,
-							disabled: (this.state.index === -1),
-							spellCheck: true,
-							onKeyDown: event => event.stopPropagation(),
-							onChange: event => {
-								this.state.pictures[this.state.index].caption = event.target.value;
-								this.state.pictures[this.state.index].favorite = true;
-								this.saveFavorites();
-								this.forceUpdate();
+							ImagePreview, {
+								picture,
+								favorite: picture.favorite, // Update if changed
+								setStage: (this.state.index === index) ?
+									() => {
+										this.forceUpdate();
+									} : null
 							}
-						})
-				)
-			)
+						),
+					keyForItem: picture => picture.file,
+					visibilityForItem: picture =>
+						(this.state.showing === 0) ||
+						((this.state.showing === 1) && picture.favorite) ||
+						((this.state.showing === 2) && picture.favorite && picture.caption),
+					onSelected: selectedIndex => {
+						this.showPicture(selectedIndex);
+					}
+				}
+			),
+			React.createElement(
+				'div', {
+					className: 'photo'
+				},
+				(this.state.index === -1) ?
+					null :
+					React.createElement(
+						ImageDetail, {
+							picture: this.state.pictures[this.state.index],
+							favorite: this.state.pictures[this.state.index].favorite, // Update if changed
+							stage: this.state.pictures[this.state.index].stage
+						}
+					)
+			),
+			React.createElement(
+				'input', {
+					type: 'text',
+					className: 'caption',
+					value: (this.state.index === -1) ? '' : this.state.pictures[this.state.index].caption,
+					disabled: (this.state.index === -1),
+					spellCheck: true,
+					onKeyDown: event => event.stopPropagation(),
+					onChange: event => {
+						this.state.pictures[this.state.index].caption = event.target.value;
+						this.state.pictures[this.state.index].favorite = true;
+						this.saveFavorites();
+						this.forceUpdate();
+					}
+				})
 		));
 		return React.createElement(React.StrictMode,
 			null,

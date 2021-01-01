@@ -33,11 +33,16 @@ ul {
 
 .frame {
 	height: 100%;
-	display: flex;
-	flex-flow: column;
+	display: grid;
+	grid-template-columns: auto 1fr;
+	grid-template-rows: auto minmax(0, 1fr) auto;
+	grid-template-areas:
+		"banner banner"
+		"list photo"
+		"list caption";
 }
 .banner {
-	flex: none;
+	grid-area: banner;
 	display: flex;
 	flex-flow: row;
 	justify-content: space-between;
@@ -45,15 +50,8 @@ ul {
 	border: 1px solid rgba(0%, 0%, 0%, 0.3);
 	color: rgba(100%, 100%, 100%, 0.9);
 }
-.content {
-	flex: 1 1 auto;
-	height: 100%;
-	display: flex;
-	flex-flow: row;
-}
-.container {
-	flex: none;
-	max-height: 100%;
+.list {
+	grid-area: list;
 	overflow-y: scroll;
 }
 .item {
@@ -64,22 +62,11 @@ ul {
 .selectedItem {
 	background-color: rgb(80%, 80%, 80%);
 }
-.current {
-	flex: 1 1 100%;
-	display: flex;
-	flex-flow: column;
-	overflow-y: hidden;
-}
-.constraint {
-	display: flex;
-	flex-flow: row;
-	height: 100%;
-}
 .photo {
-	flex: 1 1 100%;
+	grid-area: photo;
 }
 .caption {
-	flex: none;
+	grid-area: caption;
 }
 
 .image {
