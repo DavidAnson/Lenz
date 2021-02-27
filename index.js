@@ -18,7 +18,7 @@ const configurationJson = require('./configuration.json');
 
 const {dialog} = remote;
 const cancelableDelay = pCancelable.fn(delay);
-const imageRe = /\.(bmp|gif|png|jpeg|jpg|jxr|webp)$/i;
+const imageRe = /^[^.].*\.(bmp|gif|png|jpeg|jpg|jxr|webp)$/i;
 /* image-orientation: from-image; Not available in Chrome yet */
 const exifImageOrientationMap = {
 	1: '',
