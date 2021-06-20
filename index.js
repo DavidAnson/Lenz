@@ -6,7 +6,7 @@ const fs = require('fs').promises;
 const path = require('path');
 const os = require('os');
 const url = require('url');
-const Datauri = require('datauri');
+const DatauriParser = require('datauri/parser');
 const delay = require('delay');
 const {ipcRenderer: ipc} = require('electron-better-ipc');
 const pCancelable = require('p-cancelable');
@@ -96,9 +96,9 @@ class ImagePreview extends React.PureComponent {
 					}
 					let thumbnailDataUri = null;
 					if (thumbnail) {
-						const datauri = new Datauri();
-						datauri.format('.jpg', thumbnail);
-						thumbnailDataUri = datauri.content;
+						const datauriParser = new DatauriParser();
+						datauriParser.format('.jpg', thumbnail);
+						thumbnailDataUri = datauriParser.content;
 					}
 					picture.exif = {
 						orientation,
