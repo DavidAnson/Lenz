@@ -7,11 +7,11 @@ const path = require('path');
 const os = require('os');
 const url = require('url');
 const DatauriParser = require('datauri/parser');
-const delay = require('delay');
+const {setTimeout: delay} = require('node:timers/promises');
 const {ipcRenderer: ipc} = require('electron-better-ipc');
 const pCancelable = require('p-cancelable');
 const React = require('react');
-const ReactDOM = require('react-dom');
+const ReactDOM = require('react-dom/client');
 const ListBox = require('./listbox.js');
 const packageJson = require('./package.json');
 const configurationJson = require('./configuration.json');
@@ -544,7 +544,7 @@ class Page extends React.PureComponent {
 			minimizable: false,
 			resizable: false,
 			webPreferences: {
-				enableRemoteModule: true,
+				contextIsolation: false,
 				nodeIntegration: true
 			}
 		});
@@ -565,9 +565,8 @@ class Page extends React.PureComponent {
 	}
 }
 
-ReactDOM.render(
-	React.createElement(Page, null),
-	document.querySelector('#root'));
+const root = ReactDOM.createRoot(document.querySelector('#root'));
+root.render(React.createElement(Page, null));
 
 // Prevent drag/drop
 ['dragenter', 'dragover', 'drop'].forEach(type => {

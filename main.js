@@ -1,6 +1,7 @@
 'use strict';
 
 const {app, BrowserWindow, Menu} = require('electron');
+const electronRemoteMain = require('@electron/remote/main');
 const fs = require('fs').promises;
 const path = require('path');
 const url = require('url');
@@ -9,7 +10,7 @@ const fastExif = require('fast-exif');
 const Fraction = require('fraction.js');
 const packageJson = require('./package.json');
 const configurationJson = require('./configuration.json');
-require('@electron/remote/main').initialize();
+electronRemoteMain.initialize();
 
 let win;
 
@@ -18,7 +19,7 @@ function createWindow() {
 	win = new BrowserWindow({
 		title: packageJson.name,
 		webPreferences: {
-			enableRemoteModule: true,
+			contextIsolation: false,
 			nodeIntegration: true
 		}
 	});
@@ -30,6 +31,7 @@ function createWindow() {
 	win.webContents.on('will-navigate', event => {
 		event.preventDefault();
 	});
+	electronRemoteMain.enable(win.webContents);
 
 	if (configurationJson.openDevTools) {
 		win.webContents.openDevTools();

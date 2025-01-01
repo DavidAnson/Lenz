@@ -1,7 +1,6 @@
 'use strict';
 
 const {shell} = require('electron');
-const remote = require('@electron/remote');
 const packageJson = require('./package.json');
 
 function openExternal() {
@@ -41,6 +40,6 @@ document.write('</div>');
 document.addEventListener('keydown', () => {
 	const {event} = window;
 	if (event.key === 'Escape') {
-		remote.getCurrentWindow().close();
+		window.close();
 	}
 });
