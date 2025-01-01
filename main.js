@@ -10,6 +10,7 @@ const fastExif = require('fast-exif');
 const Fraction = require('fraction.js');
 const packageJson = require('./package.json');
 const configurationJson = require('./configuration.json');
+
 electronRemoteMain.initialize();
 
 let win;
