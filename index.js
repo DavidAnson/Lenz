@@ -19,17 +19,6 @@ const configurationJson = require('./configuration.json');
 const {dialog} = remote;
 const cancelableDelay = pCancelable.fn(delay);
 const imageRe = /^[^.].*\.(bmp|gif|png|jpeg|jpg|jxr|webp)$/i;
-/* image-orientation: from-image; Not available in Chrome yet */
-const exifImageOrientationMap = {
-	1: '',
-	2: 'scale(-1, 1)',
-	3: 'rotate(180deg)',
-	4: 'scale(1, -1)',
-	5: 'rotate(90deg) scale(1, -1)',
-	6: 'rotate(90deg)',
-	7: 'rotate(270deg) scale(1, -1)',
-	8: 'rotate(270deg)'
-};
 const encodingUtf8 = {encoding: 'utf8'};
 const favoritesTxt = 'Favorites.txt';
 
@@ -44,7 +33,6 @@ class ImagePreview extends React.PureComponent {
 	render() {
 		const {picture} = this.props;
 		const {exif} = picture;
-		const orientation = exif ? exif.orientation : null;
 		const thumbnailDataUri = exif ? exif.thumbnailDataUri : null;
 		const file = path.basename(picture.file);
 		const setStage = stage => {
@@ -59,7 +47,7 @@ class ImagePreview extends React.PureComponent {
 		if (this.state.stage === 'loading') {
 			ipc.callMain('getExif', picture.file)
 				.then(exif => {
-					const {exposureTime, flash, fNumber, focalLength, gpsLatitude, gpsLongitude, iso, make, model, modifyDate, orientation, thumbnail} = exif;
+					const {exposureTime, flash, fNumber, focalLength, gpsLatitude, gpsLongitude, iso, make, model, modifyDate, thumbnail} = exif;
 					const details = [
 						file
 					];
@@ -101,7 +89,6 @@ class ImagePreview extends React.PureComponent {
 						thumbnailDataUri = datauriParser.content;
 					}
 					picture.exif = {
-						orientation,
 						thumbnailDataUri,
 						details
 					};
@@ -119,10 +106,7 @@ class ImagePreview extends React.PureComponent {
 		} else if (this.state.stage === 'preview') {
 			if (thumbnailDataUri) {
 				pushImage({
-					src: thumbnailDataUri,
-					style: {
-						transform: exifImageOrientationMap[orientation || 1]
-					}
+					src: thumbnailDataUri
 				});
 			} else {
 				pushImage({src: 'waiting.svg'});
@@ -140,9 +124,6 @@ class ImagePreview extends React.PureComponent {
 		} else if (this.state.stage === 'loaded') {
 			pushImage({
 				src: picture.file,
-				style: {
-					transform: exifImageOrientationMap[orientation || 1]
-				},
 				onError: () => {
 					setStage('error');
 				}
@@ -183,7 +164,6 @@ class ImageDetail extends React.PureComponent {
 	render() {
 		const {picture} = this.props;
 		const {exif} = picture;
-		const orientation = exif ? exif.orientation : null;
 		const details = exif ? exif.details : null;
 		const thumbnailDataUri = exif ? exif.thumbnailDataUri : null;
 		const children = [];
@@ -196,26 +176,14 @@ class ImageDetail extends React.PureComponent {
 		} else if (this.props.stage === 'preview') {
 			if (thumbnailDataUri) {
 				pushImage({
-					src: thumbnailDataUri,
-					style: {
-						transform: exifImageOrientationMap[orientation || 1]
-					}
+					src: thumbnailDataUri
 				});
 			} else {
 				pushImage({src: 'waiting.svg'});
 			}
 		} else if (this.props.stage === 'loaded') {
-			let scale = 1;
-			if ((orientation >= 5) && (orientation <= 8)) {
-				const preScale = Math.min((this.state.outerWidth / this.state.innerWidth), (this.state.outerHeight / this.state.innerHeight));
-				const postScale = Math.min((this.state.outerWidth / this.state.innerHeight), (this.state.outerHeight / this.state.innerWidth));
-				scale = postScale / preScale;
-			}
 			pushImage({
 				src: picture.file,
-				style: {
-					transform: exifImageOrientationMap[orientation || 1] + ` scale(${scale})`
-				},
 				ref: element => {
 					if (element) {
 						const outerWidth = element.clientWidth;

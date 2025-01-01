@@ -133,7 +133,6 @@ ipc.answerRenderer('getExif', file => {
 				make,
 				model,
 				modifyDate,
-				orientation: exifImage.Orientation,
 				thumbnail: exifThumbnail.buffer
 			};
 		});
