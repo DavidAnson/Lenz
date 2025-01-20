@@ -256,9 +256,9 @@ class Page extends React.PureComponent {
 		this.onKeydown = event => {
 			const {index} = this.state;
 			const picture = this.state.pictures[index];
+			let handled = true;
 			switch (event.key) {
 				case ' ':
-					event.preventDefault();
 					picture.favorite = !picture.favorite;
 					if (picture.favorite) {
 						picture.caption = picture.captionSaved || '';
@@ -284,7 +284,11 @@ class Page extends React.PureComponent {
 					this.openFolder();
 					break;
 				default:
+					handled = false;
 					break;
+			}
+			if (handled) {
+				event.preventDefault();
 			}
 		};
 		this.beforeunload = event => {
