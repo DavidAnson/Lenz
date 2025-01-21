@@ -8,6 +8,7 @@ const url = require('url');
 const {ipcMain: ipc} = require('electron-better-ipc');
 const fastExif = require('fast-exif');
 const Fraction = require('fraction.js');
+const roundTo = require('round-to');
 const packageJson = require('./package.json');
 const configurationJson = require('./configuration.json');
 
@@ -119,8 +120,11 @@ ipc.answerRenderer('getExif', file => {
 			const exifImage = exif.image || {};
 			const exifThumbnail = exif.thumbnail || {};
 			const exposureTime = exifExif.ExposureTime ? (new Fraction(exifExif.ExposureTime)).toFraction() : null;
+			const fNumber = exifExif.FNumber ? roundTo(exifExif.FNumber, 2) : null;
+			const focalLength = exifExif.FocalLength ? roundTo(exifExif.FocalLength, 2) : null;
 			const gpsLatitude = gpsCoordinatesToString(exifGps.GPSLatitude, exifGps.GPSLatitudeRef);
 			const gpsLongitude = gpsCoordinatesToString(exifGps.GPSLongitude, exifGps.GPSLongitudeRef);
+			const iso = exifExif.ISO ? roundTo(exifExif.ISO, 0) : null;
 			const make = (exifImage.Make || '').replace(/\0/g, '');
 			const model = (exifImage.Model || '').replace(/\0/g, '');
 			const modifyDate = exifImage.ModifyDate &&
@@ -128,11 +132,11 @@ ipc.answerRenderer('getExif', file => {
 			return {
 				exposureTime,
 				flash: exifExif.Flash,
-				fNumber: exifExif.FNumber,
-				focalLength: exifExif.FocalLength,
+				fNumber,
+				focalLength,
 				gpsLatitude,
 				gpsLongitude,
-				iso: exifExif.ISO,
+				iso,
 				make,
 				model,
 				modifyDate,
